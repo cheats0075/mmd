@@ -282,6 +282,7 @@ function adicionarAoCarrinho(id, nome, preco, estoque) {
   updateCarrinho();
   document.getElementById('pdv-busca').value = '';
   document.getElementById('pdv-resultados').innerHTML = '';
+  showToast(`${nome} adicionado ao carrinho`, 'success');
 }
 
 function updateCarrinho() {
@@ -346,13 +347,39 @@ async function finalizarVenda() {
     return;
   }
   try {
-    await api('/vendas', {
+    const result = await api('/vendas', {
       method: 'POST',
       body: JSON.stringify({
         itens: carrinho.map(item => ({ produtoId: item.produtoId, quantidade: item.quantidade, precoUnit: item.precoUnit, desconto: item.desconto })),
         pagamentos: [{ formaPagamento, valor: recebido || total, troco: Math.max(0, recebido - total) }],
         desconto: parseFloat(document.getElementById('pdv-desconto').value) || 0
       })
+    });
+    const troco = Math.max(0, recebido - total);
+    let cupomHtml = `
+      <div style="font-family:monospace;text-align:center;max-width:400px;margin:0 auto;">
+        <h5>Venda #${result.id} Concluída!</h5>
+        <hr>
+        <p><strong>Data:</strong> ${new Date().toLocaleString('pt-BR')}</p>
+        <hr>
+        <table style="width:100%;font-size:14px;">
+          <tr><th style="text-align:left;">Item</th><th>Qtd</th><th style="text-align:right;">Total</th></tr>
+          ${carrinho.map(item => `<tr><td style="text-align:left;">${item.nome}</td><td>${item.quantidade}x</td><td style="text-align:right;">R$ ${((item.precoUnit * item.quantidade) - item.desconto).toFixed(2).replace('.', ',')}</td></tr>`).join('')}
+        </table>
+        <hr>
+        <p><strong>Pagamento:</strong> ${formaPagamento}</p>
+        <h4>TOTAL: R$ ${total.toFixed(2).replace('.', ',')}</h4>
+        ${troco > 0 ? `<h5>Troco: R$ ${troco.toFixed(2).replace('.', ',')}</h5>` : ''}
+        <hr>
+        <p style="font-size:12px;">Obrigado pela preferência!</p>
+      </div>
+    `;
+    document.getElementById('modal-title').textContent = 'Venda Finalizada';
+    document.getElementById('modal-body').innerHTML = cupomHtml;
+    document.getElementById('modal-save').style.display = 'none';
+    new bootstrap.Modal(document.getElementById('modal')).show();
+    document.querySelector('#modal .btn-close').addEventListener('click', () => {
+      document.getElementById('modal-save').style.display = '';
     });
     showToast('Venda realizada com sucesso!', 'success');
     carrinho = [];

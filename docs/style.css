@@ -279,12 +279,34 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-muted);
-  border-bottom-width: 1px;
+  border-bottom: 2px solid var(--border) !important;
 }
 
 .table td {
   vertical-align: middle;
   font-size: 0.9rem;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+  --bs-table-bg-type: rgba(0,0,0,0.02);
+}
+
+hr {
+  border-color: var(--border) !important;
+  opacity: 1 !important;
+}
+
+.list-group-item {
+  border-color: var(--border) !important;
+}
+
+.modal-content {
+  border: 1px solid var(--border) !important;
+}
+
+.card {
+  border: 1px solid var(--border) !important;
 }
 
 /* BUTTONS */
@@ -388,6 +410,21 @@ body {
 #pdv-carrinho tr td {
   padding: 0.5rem;
   vertical-align: middle;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+#pdv-carrinho tr th {
+  border-bottom: 2px solid var(--border) !important;
+}
+
+#page-pdv .card {
+  border: 1px solid var(--border) !important;
+}
+
+#page-pdv .form-control, #page-pdv .form-select {
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  background: var(--card-bg) !important;
 }
 
 /* ANIMATIONS */
