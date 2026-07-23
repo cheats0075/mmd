@@ -305,10 +305,17 @@ body {
 }
 
 /* FORMS */
+.form-label {
+  color: var(--text);
+  font-weight: 500;
+}
+
 .form-control, .form-select {
   border-radius: 8px;
   border: 1px solid var(--border);
   padding: 0.5rem 0.75rem;
+  color: var(--text);
+  background: var(--card-bg);
 }
 
 .form-control:focus, .form-select:focus {

@@ -69,6 +69,12 @@ function initEventListeners() {
 }
 
 // API HELPERS
+function resetModalButton() {
+  const btn = document.getElementById('modal-save');
+  btn.disabled = false;
+  btn.textContent = 'Salvar';
+}
+
 async function api(path, options = {}) {
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -387,6 +393,7 @@ async function loadProdutos() {
 }
 
 async function openProdutoModal(id = null) {
+  resetModalButton();
   let produto = {};
   if (id) {
     produto = await api(`/produtos/${id}`);
@@ -518,6 +525,7 @@ async function loadClientes() {
 }
 
 async function openClienteModal(id = null) {
+  resetModalButton();
   let cliente = {};
   if (id) cliente = await api(`/clientes/${id}`);
   document.getElementById('modal-title').textContent = id ? 'Editar Cliente' : 'Novo Cliente';
@@ -598,6 +606,7 @@ async function loadFornecedores() {
 }
 
 async function openFornecedorModal(id = null) {
+  resetModalButton();
   let f = {};
   if (id) f = await api(`/fornecedores/${id}`);
   document.getElementById('modal-title').textContent = id ? 'Editar Fornecedor' : 'Novo Fornecedor';
@@ -669,6 +678,7 @@ async function loadFuncionarios() {
 }
 
 async function openFuncionarioModal(id = null) {
+  resetModalButton();
   let u = {};
   if (id) u = await api(`/usuarios/${id}`);
   document.getElementById('modal-title').textContent = id ? 'Editar Funcionário' : 'Novo Funcionário';
@@ -785,6 +795,7 @@ async function fecharCaixa() {
 }
 
 async function openSangriaModal() {
+  resetModalButton();
   document.getElementById('modal-title').textContent = 'Sangria / Suprimento';
   document.getElementById('modal-body').innerHTML = `
     <div class="mb-3"><label class="form-label">Tipo</label><select class="form-select" id="m-tipo"><option value="SANGRIA">Sangria</option><option value="SUPRIMENTO">Suprimento</option></select></div>
@@ -851,6 +862,7 @@ async function receberConta(id) {
 }
 
 async function openContaModal(tipo) {
+  resetModalButton();
   document.getElementById('modal-title').textContent = tipo === 'pagar' ? 'Nova Conta a Pagar' : 'Nova Conta a Receber';
   document.getElementById('modal-body').innerHTML = `
     <div class="mb-3"><label class="form-label">Descrição *</label><input type="text" class="form-control" id="m-descricao" required></div>
