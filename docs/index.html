@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SuperMercado - Sistema de Gestão</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+  <!-- LOGIN -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">
+        <i class="bi bi-cart4"></i>
+        <h2>SuperMercado</h2>
+        <p>Sistema de Gestão</p>
+      </div>
+      <form id="login-form">
+        <div class="mb-3">
+          <label class="form-label">Usuário</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-person"></i></span>
+            <input type="text" class="form-control" id="login-usuario" required>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Senha</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input type="password" class="form-control" id="login-senha" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100 mb-3">
+          <i class="bi bi-box-arrow-in-right"></i> Entrar
+        </button>
+        <a href="#" id="link-recuperar" class="d-block text-center text-decoration-none">Esqueci minha senha</a>
+      </form>
+      <div id="login-erro" class="alert alert-danger d-none mt-3"></div>
+    </div>
+  </div>
+
+  <!-- ALTERAR SENHA (primeiro login) -->
+  <div id="senha-screen" class="login-screen d-none">
+    <div class="login-card">
+      <h4 class="text-center mb-4"><i class="bi bi-key"></i> Alterar Senha</h4>
+      <p class="text-muted text-center">Você deve alterar sua senha no primeiro login.</p>
+      <form id="senha-form">
+        <div class="mb-3">
+          <label class="form-label">Senha Atual</label>
+          <input type="password" class="form-control" id="senha-atual" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Nova Senha</label>
+          <input type="password" class="form-control" id="nova-senha" required minlength="6">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Confirmar Nova Senha</label>
+          <input type="password" class="form-control" id="confirmar-senha" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Alterar Senha</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SISTEMA PRINCIPAL -->
+  <div id="app" class="d-none">
+    <!-- SIDEBAR -->
+    <nav id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <i class="bi bi-cart4"></i>
+        <span>SuperMercado</span>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="#" class="nav-link active" data-page="dashboard"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a></li>
+        <li><a href="#" class="nav-link" data-page="pdv"><i class="bi bi-printer"></i><span>PDV</span></a></li>
+        <li><a href="#" class="nav-link" data-page="produtos"><i class="bi bi-box"></i><span>Produtos</span></a></li>
+        <li><a href="#" class="nav-link" data-page="estoque"><i class="bi bi-boxes"></i><span>Estoque</span></a></li>
+        <li><a href="#" class="nav-link" data-page="clientes"><i class="bi bi-people"></i><span>Clientes</span></a></li>
+        <li><a href="#" class="nav-link" data-page="fornecedores"><i class="bi bi-truck"></i><span>Fornecedores</span></a></li>
+        <li><a href="#" class="nav-link" data-page="funcionarios"><i class="bi bi-person-badge"></i><span>Funcionários</span></a></li>
+        <li><a href="#" class="nav-link" data-page="caixa"><i class="bi bi-cash-stack"></i><span>Caixa</span></a></li>
+        <li><a href="#" class="nav-link" data-page="financeiro"><i class="bi bi-currency-dollar"></i><span>Financeiro</span></a></li>
+        <li><a href="#" class="nav-link" data-page="relatorios"><i class="bi bi-file-earmark-bar-graph"></i><span>Relatórios</span></a></li>
+        <li><a href="#" class="nav-link" data-page="configuracoes"><i class="bi bi-gear"></i><span>Configurações</span></a></li>
+        <li><a href="#" class="nav-link" data-page="auditoria"><i class="bi bi-shield-lock"></i><span>Auditoria</span></a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <a href="#" id="btn-minha-conta"><i class="bi bi-person-circle"></i><span>Minha Conta</span></a>
+        <a href="#" id="btn-logout"><i class="bi bi-box-arrow-left"></i><span>Sair</span></a>
+      </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main id="main-content" class="main-content">
+      <!-- TOPBAR -->
+      <nav class="topbar">
+        <button class="btn btn-link" id="btn-toggle-sidebar">
+          <i class="bi bi-list fs-4"></i>
+        </button>
+        <div class="topbar-search">
+          <i class="bi bi-search"></i>
+          <input type="text" id="global-search" placeholder="Pesquisar..." class="form-control">
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-link" id="btn-theme-toggle" title="Alternar tema">
+            <i class="bi bi-moon"></i>
+          </button>
+          <span class="badge bg-primary" id="user-name"></span>
+        </div>
+      </nav>
+
+      <!-- PAGES -->
+      <div id="page-content" class="page-content">
+        <!-- DASHBOARD -->
+        <div id="page-dashboard" class="page active">
+          <h4 class="mb-4">Dashboard</h4>
+          <div class="row g-3 mb-4">
+            <div class="col-md-3">
+              <div class="card stat-card">
+                <div class="card-body">
+                  <div class="stat-icon bg-success"><i class="bi bi-currency-dollar"></i></div>
+                  <h6>Vendas Hoje</h6>
+                  <h3 id="stat-vendas">R$ 0,00</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stat-card">
+                <div class="card-body">
+                  <div class="stat-icon bg-primary"><i class="bi bi-cash-stack"></i></div>
+                  <h6>Caixa</h6>
+                  <h3 id="stat-caixa">Fechado</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stat-card">
+                <div class="card-body">
+                  <div class="stat-icon bg-warning"><i class="bi bi-box"></i></div>
+                  <h6>Produtos</h6>
+                  <h3 id="stat-produtos">0</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stat-card">
+                <div class="card-body">
+                  <div class="stat-icon bg-info"><i class="bi bi-people"></i></div>
+                  <h6>Clientes</h6>
+                  <h3 id="stat-clientes">0</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row g-3 mb-4">
+            <div class="col-md-3">
+              <div class="card stat-card border-warning">
+                <div class="card-body text-warning">
+                  <h6><i class="bi bi-exclamation-triangle"></i> Estoque Baixo</h6>
+                  <h3 id="stat-estoque-baixo">0</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stat-card border-danger">
+                <div class="card-body text-danger">
+                  <h6><i class="bi bi-x-circle"></i> Sem Estoque</h6>
+                  <h3 id="stat-sem-estoque">0</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stat-card">
+                <div class="card-body">
+                  <h6><i class="bi bi-graph-up"></i> Lucro Diário</h6>
+                  <h3 id="stat-lucro-diario">R$ 0,00</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stat-card">
+                <div class="card-body">
+                  <h6><i class="bi bi-graph-up-arrow"></i> Lucro Mensal</h6>
+                  <h3 id="stat-lucro-mensal">R$ 0,00</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-8">
+              <div class="card">
+                <div class="card-header"><h6>Últimas Vendas</h6></div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                      <thead><tr><th>#</th><th>Cliente</th><th>Valor</th><th>Data</th></tr></thead>
+                      <tbody id="dashboard-vendas"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-header"><h6>Produtos Mais Vendidos</h6></div>
+                <div class="card-body">
+                  <div id="dashboard-mais-vendidos"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PDV -->
+        <div id="page-pdv" class="page">
+          <h4 class="mb-4"><i class="bi bi-printer"></i> Frente de Caixa (PDV)</h4>
+          <div class="row g-3">
+            <div class="col-md-8">
+              <div class="card">
+                <div class="card-body">
+                  <div class="input-group mb-3">
+                    <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                    <input type="text" class="form-control" id="pdv-busca" placeholder="Escaneie ou digite o código/nome do produto..." autofocus>
+                    <button class="btn btn-primary" id="pdv-busca-btn"><i class="bi bi-search"></i></button>
+                  </div>
+                  <div id="pdv-resultados" class="mb-3" style="max-height:200px;overflow-y:auto;"></div>
+                  <div class="table-responsive">
+                    <table class="table table-sm">
+                      <thead><tr><th>Item</th><th>Produto</th><th>Qtd</th><th>Preço</th><th>Desc</th><th>Total</th><th></th></tr></thead>
+                      <tbody id="pdv-carrinho"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-body text-center">
+                  <h6>Subtotal</h6>
+                  <h3 id="pdv-subtotal">R$ 0,00</h3>
+                  <hr>
+                  <div class="mb-3">
+                    <label class="form-label">Desconto (R$)</label>
+                    <input type="number" class="form-control" id="pdv-desconto" value="0" min="0" step="0.01">
+                  </div>
+                  <h4>TOTAL</h4>
+                  <h2 class="text-success" id="pdv-total">R$ 0,00</h2>
+                  <hr>
+                  <div class="mb-3">
+                    <label class="form-label">Forma de Pagamento</label>
+                    <select class="form-select" id="pdv-pagamento">
+                      <option value="DINHEIRO">Dinheiro</option>
+                      <option value="PIX">PIX</option>
+                      <option value="CARTAO_CREDITO">Cartão Crédito</option>
+                      <option value="CARTAO_DEBITO">Cartão Débito</option>
+                      <option value="VALE">Vale</option>
+                    </select>
+                  </div>
+                  <div class="mb-3" id="pdv-troco-group">
+                    <label class="form-label">Valor Recebido</label>
+                    <input type="number" class="form-control" id="pdv-recebido" value="0" step="0.01">
+                    <small class="text-muted">Troco: <strong id="pdv-troco">R$ 0,00</strong></small>
+                  </div>
+                  <button class="btn btn-success btn-lg w-100 mb-2" id="pdv-finalizar">
+                    <i class="bi bi-check-circle"></i> Finalizar Venda
+                  </button>
+                  <button class="btn btn-outline-danger w-100" id="pdv-cancelar">
+                    <i class="bi bi-x-circle"></i> Cancelar Venda
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRODUTOS -->
+        <div id="page-produtos" class="page">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4>Produtos</h4>
+            <button class="btn btn-primary" id="btn-novo-produto"><i class="bi bi-plus-lg"></i> Novo Produto</button>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <input type="text" class="form-control mb-3" id="busca-produtos" placeholder="Pesquisar produtos...">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead><tr><th>Código</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Estoque</th><th>Ações</th></tr></thead>
+                  <tbody id="tabela-produtos"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ESTOQUE -->
+        <div id="page-estoque" class="page">
+          <h4 class="mb-4">Controle de Estoque</h4>
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <button class="btn btn-success w-100" id="btn-entrada-estoque"><i class="bi bi-plus-circle"></i> Entrada</button>
+            </div>
+            <div class="col-md-4">
+              <button class="btn btn-warning w-100" id="btn-saida-estoque"><i class="bi bi-dash-circle"></i> Saída</button>
+            </div>
+            <div class="col-md-4">
+              <button class="btn btn-info w-100" id="btn-ajuste-estoque"><i class="bi bi-pencil"></i> Ajuste</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Quantidade</th><th>Motivo</th></tr></thead>
+                  <tbody id="tabela-estoque"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CLIENTES -->
+        <div id="page-clientes" class="page">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4>Clientes</h4>
+            <button class="btn btn-primary" id="btn-novo-cliente"><i class="bi bi-plus-lg"></i> Novo Cliente</button>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <input type="text" class="form-control mb-3" id="busca-clientes" placeholder="Pesquisar clientes...">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead><tr><th>Nome</th><th>CPF/CNPJ</th><th>Telefone</th><th>Email</th><th>Ações</th></tr></thead>
+                  <tbody id="tabela-clientes"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FORNECEDORES -->
+        <div id="page-fornecedores" class="page">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4>Fornecedores</h4>
+            <button class="btn btn-primary" id="btn-novo-fornecedor"><i class="bi bi-plus-lg"></i> Novo Fornecedor</button>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <input type="text" class="form-control mb-3" id="busca-fornecedores" placeholder="Pesquisar fornecedores...">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead><tr><th>Razão Social</th><th>CNPJ</th><th>Telefone</th><th>Cidade</th><th>Ações</th></tr></thead>
+                  <tbody id="tabela-fornecedores"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FUNCIONÁRIOS -->
+        <div id="page-funcionarios" class="page">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4>Funcionários / Usuários</h4>
+            <button class="btn btn-primary" id="btn-novo-funcionario"><i class="bi bi-plus-lg"></i> Novo Funcionário</button>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead><tr><th>Nome</th><th>Usuário</th><th>Cargo</th><th>Status</th><th>Ações</th></tr></thead>
+                  <tbody id="tabela-funcionarios"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAIXA -->
+        <div id="page-caixa" class="page">
+          <h4 class="mb-4">Gerenciamento de Caixa</h4>
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <button class="btn btn-success w-100" id="btn-abrir-caixa"><i class="bi bi-box-arrow-in-right"></i> Abrir Caixa</button>
+            </div>
+            <div class="col-md-4">
+              <button class="btn btn-danger w-100" id="btn-fechar-caixa"><i class="bi bi-box-arrow-left"></i> Fechar Caixa</button>
+            </div>
+            <div class="col-md-4">
+              <button class="btn btn-warning w-100" id="btn-sangria"><i class="bi bi-cash"></i> Sangria / Suprimento</button>
+            </div>
+          </div>
+          <div class="card mb-4">
+            <div class="card-header"><h6>Caixa Atual</h6></div>
+            <div class="card-body" id="caixa-info">
+              <p>Nenhum caixa aberto.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h6>Histórico de Caixas</h6></div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead><tr><th>#</th><th>Status</th><th>Abertura</th><th>Fechamento</th><th>Valor</th></tr></thead>
+                  <tbody id="tabela-caixas"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FINANCEIRO -->
+        <div id="page-financeiro" class="page">
+          <h4 class="mb-4">Financeiro</h4>
+          <ul class="nav nav-tabs mb-4">
+            <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-pagar">Contas a Pagar</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-receber">Contas a Receber</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-fluxo">Fluxo de Caixa</a></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="tab-pagar">
+              <div class="d-flex justify-content-between mb-3">
+                <h6>Contas a Pagar</h6>
+                <button class="btn btn-primary btn-sm" id="btn-nova-conta-pagar"><i class="bi bi-plus"></i> Nova Conta</button>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead><tr><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr></thead>
+                  <tbody id="tabela-pagar"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="tab-receber">
+              <div class="d-flex justify-content-between mb-3">
+                <h6>Contas a Receber</h6>
+                <button class="btn btn-primary btn-sm" id="btn-nova-conta-receber"><i class="bi bi-plus"></i> Nova Conta</button>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead><tr><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr></thead>
+                  <tbody id="tabela-receber"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="tab-fluxo">
+              <div class="card">
+                <div class="card-body">
+                  <div class="row text-center">
+                    <div class="col-md-4"><h6>Entradas</h6><h3 class="text-success" id="fluxo-entradas">R$ 0,00</h3></div>
+                    <div class="col-md-4"><h6>Saídas</h6><h3 class="text-danger" id="fluxo-saidas">R$ 0,00</h3></div>
+                    <div class="col-md-4"><h6>Saldo</h6><h3 id="fluxo-saldo">R$ 0,00</h3></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RELATÓRIOS -->
+        <div id="page-relatorios" class="page">
+          <h4 class="mb-4">Relatórios</h4>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-body text-center">
+                  <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                  <h6>Relatório de Vendas</h6>
+                  <button class="btn btn-outline-primary btn-sm" onclick="gerarRelatorio('vendas')">Gerar</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-body text-center">
+                  <i class="bi bi-box fs-1 text-primary"></i>
+                  <h6>Produtos</h6>
+                  <button class="btn btn-outline-primary btn-sm" onclick="gerarRelatorio('produtos')">Gerar</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-body text-center">
+                  <i class="bi bi-boxes fs-1 text-warning"></i>
+                  <h6>Estoque</h6>
+                  <button class="btn btn-outline-primary btn-sm" onclick="gerarRelatorio('estoque')">Gerar</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-body text-center">
+                  <i class="bi bi-people fs-1 text-info"></i>
+                  <h6>Clientes</h6>
+                  <button class="btn btn-outline-primary btn-sm" onclick="gerarRelatorio('clientes')">Gerar</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-body text-center">
+                  <i class="bi bi-currency-dollar fs-1 text-success"></i>
+                  <h6>Financeiro</h6>
+                  <button class="btn btn-outline-primary btn-sm" onclick="gerarRelatorio('financeiro')">Gerar</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-body text-center">
+                  <i class="bi bi-graph-up fs-1 text-secondary"></i>
+                  <h6>Lucro</h6>
+                  <button class="btn btn-outline-primary btn-sm" onclick="gerarRelatorio('lucro')">Gerar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card mt-4">
+            <div class="card-body" id="relatorio-resultado">
+              <p class="text-muted text-center">Selecione um relatório acima para gerar.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONFIGURAÇÕES -->
+        <div id="page-configuracoes" class="page">
+          <h4 class="mb-4">Configurações</h4>
+          <div class="card">
+            <div class="card-body">
+              <form id="form-config">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Nome da Empresa</label>
+                    <input type="text" class="form-control" id="config-empresa">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">CNPJ</label>
+                    <input type="text" class="form-control" id="config-cnpj">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Telefone</label>
+                    <input type="text" class="form-control" id="config-telefone">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" id="config-email">
+                  </div>
+                  <div class="col-md-12">
+                    <label class="form-label">Endereço</label>
+                    <input type="text" class="form-control" id="config-endereco">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Imposto Padrão (%)</label>
+                    <input type="number" class="form-control" id="config-imposto" step="0.1">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Texto do Cupom</label>
+                    <input type="text" class="form-control" id="config-cupom">
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-4"><i class="bi bi-check-lg"></i> Salvar Configurações</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- AUDITORIA -->
+        <div id="page-auditoria" class="page">
+          <h4 class="mb-4">Auditoria</h4>
+          <div class="card">
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead><tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Tabela</th><th>IP</th></tr></thead>
+                  <tbody id="tabela-auditoria"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MINHA CONTA -->
+        <div id="page-minha-conta" class="page">
+          <h4 class="mb-4">Minha Conta</h4>
+          <div class="card">
+            <div class="card-body">
+              <form id="form-conta">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Nome</label>
+                    <input type="text" class="form-control" id="conta-nome">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" id="conta-email">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Telefone</label>
+                    <input type="text" class="form-control" id="conta-telefone">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Nova Senha</label>
+                    <input type="password" class="form-control" id="conta-senha" placeholder="Deixe vazio para não alterar">
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-4"><i class="bi bi-check-lg"></i> Salvar</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL GENÉRICO -->
+  <div class="modal fade" id="modal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-title"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="modal-body"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="modal-save">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="toast" class="toast" role="alert">
+      <div class="toast-header">
+        <strong class="me-auto" id="toast-title">SuperMercado</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+      </div>
+      <div class="toast-body" id="toast-body"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

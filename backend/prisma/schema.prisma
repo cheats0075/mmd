@@ -1,0 +1,244 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id            Int       @id @default(autoincrement())
+  nome          String
+  email         String?   @unique
+  telefone      String?
+  usuario       String    @unique
+  senha         String
+  foto          String?
+  cargo         String    @default("CAIXA")
+  permissoes    Json?
+  status        String    @default("ATIVO")
+  primeiroLogin Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  vendas        Venda[]
+  auditorias    Auditoria[]
+  caixas        Caixa[]
+}
+
+model Cliente {
+  id          Int       @id @default(autoincrement())
+  nome        String
+  cpfCnpj     String?   @unique
+  telefone    String?
+  celular     String?
+  email       String?
+  dataNascimento DateTime?
+  cep         String?
+  endereco    String?
+  numero      String?
+  complemento String?
+  bairro      String?
+  cidade      String?
+  estado      String?
+  observacoes String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  vendas      Venda[]
+}
+
+model Funcionario {
+  id          Int       @id @default(autoincrement())
+  nome        String
+  cpf         String    @unique
+  cargo       String
+  telefone    String?
+  usuario     String    @unique
+  senha       String
+  foto        String?
+  permissoes  Json?
+  status      String    @default("ATIVO")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Fornecedor {
+  id           Int       @id @default(autoincrement())
+  razaoSocial  String
+  nomeFantasia String?
+  cnpj         String    @unique
+  ie           String?
+  telefone     String?
+  email        String?
+  contato      String?
+  endereco     String?
+  cidade       String?
+  estado       String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  produtos     Produto[]
+}
+
+model Categoria {
+  id        Int       @id @default(autoincrement())
+  nome      String    @unique
+  descricao String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  produtos  Produto[]
+}
+
+model Produto {
+  id              Int       @id @default(autoincrement())
+  codigoBarras    String?   @unique
+  codigoInterno   String?   @unique
+  nome            String
+  categoriaId     Int?
+  categoria       Categoria? @relation(fields: [categoriaId], references: [id])
+  marca           String?
+  unidade         String    @default("UN")
+  precoCusto      Decimal   @default(0)
+  precoVenda      Decimal   @default(0)
+  quantidade      Decimal   @default(0)
+  estoqueMinimo   Decimal   @default(0)
+  fornecedorId    Int?
+  fornecedor      Fornecedor? @relation(fields: [fornecedorId], references: [id])
+  validade        DateTime?
+  descricao       String?
+  imagem          String?
+  status          String    @default("ATIVO")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  itensVenda      ItemVenda[]
+  movimentacoes   MovimentacaoEstoque[]
+}
+
+model MovimentacaoEstoque {
+  id          Int       @id @default(autoincrement())
+  produtoId   Int
+  produto     Produto   @relation(fields: [produtoId], references: [id])
+  tipo        String
+  quantidade  Decimal
+  motivo      String?
+  documento   String?
+  usuarioId   Int?
+  createdAt   DateTime  @default(now())
+}
+
+model Caixa {
+  id            Int       @id @default(autoincrement())
+  numero        Int
+  status        String    @default("FECHADO")
+  valorAbertura Decimal   @default(0)
+  valorFechamento Decimal?
+  dataAbertura  DateTime?
+  dataFechamento DateTime?
+  usuarioId     Int?
+  usuario       Usuario?  @relation(fields: [usuarioId], references: [id])
+  sangrias      Sangria[]
+  vendas        Venda[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Sangria {
+  id        Int       @id @default(autoincrement())
+  caixaId   Int
+  caixa     Caixa     @relation(fields: [caixaId], references: [id])
+  tipo      String
+  valor     Decimal
+  motivo    String?
+  usuarioId Int?
+  createdAt DateTime  @default(now())
+}
+
+model Venda {
+  id              Int       @id @default(autoincrement())
+  clienteId       Int?
+  cliente         Cliente?  @relation(fields: [clienteId], references: [id])
+  caixaId         Int?
+  caixa           Caixa?    @relation(fields: [caixaId], references: [id])
+  usuarioId       Int?
+  usuario         Usuario?  @relation(fields: [usuarioId], references: [id])
+  subtotal        Decimal   @default(0)
+  desconto        Decimal   @default(0)
+  total           Decimal   @default(0)
+  formaPagamento  String?
+  status          String    @default("CONCLUIDA")
+  cupom           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  itens           ItemVenda[]
+  pagamentos      Pagamento[]
+}
+
+model ItemVenda {
+  id        Int       @id @default(autoincrement())
+  vendaId   Int
+  venda     Venda     @relation(fields: [vendaId], references: [id])
+  produtoId Int
+  produto   Produto   @relation(fields: [produtoId], references: [id])
+  quantidade Decimal
+  precoUnitario Decimal
+  desconto  Decimal   @default(0)
+  total     Decimal
+}
+
+model Pagamento {
+  id            Int       @id @default(autoincrement())
+  vendaId       Int
+  venda         Venda     @relation(fields: [vendaId], references: [id])
+  formaPagamento String
+  valor         Decimal
+  troco         Decimal   @default(0)
+  createdAt     DateTime  @default(now())
+}
+
+model ContaPagar {
+  id            Int       @id @default(autoincrement())
+  descricao     String
+  valor         Decimal
+  dataVencimento DateTime
+  dataPagamento DateTime?
+  status        String    @default("PENDENTE")
+  categoria     String?
+  fornecedorId  Int?
+  observacao     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model ContaReceber {
+  id            Int       @id @default(autoincrement())
+  descricao     String
+  valor         Decimal
+  dataVencimento DateTime
+  dataPagamento DateTime?
+  status        String    @default("PENDENTE")
+  categoria     String?
+  clienteId     Int?
+  observacao     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Auditoria {
+  id        Int      @id @default(autoincrement())
+  acao      String
+  tabela    String?
+  registroId Int?
+  dados     Json?
+  usuarioId Int?
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id])
+  ip        String?
+  createdAt DateTime @default(now())
+}
+
+model Configuracao {
+  id            Int      @id @default(autoincrement())
+  chave         String   @unique
+  valor         String?
+  descricao     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
