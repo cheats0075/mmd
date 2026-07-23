@@ -25,11 +25,9 @@ router.get('/', async (req, res) => {
 
 router.get('/baixos', async (req, res) => {
   try {
-    const produtos = await prisma.produto.findMany({
-      where: { quantidade: { lte: prisma.produto.fields.estoqueMinimo } },
-      include: { categoria: true }
-    });
-    res.json(produtos);
+    const todos = await prisma.produto.findMany({ include: { categoria: true } });
+    const baixos = todos.filter(p => Number(p.quantidade) <= Number(p.estoqueMinimo) && Number(p.quantidade) > 0);
+    res.json(baixos);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao buscar estoque baixo' });
   }

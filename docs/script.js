@@ -465,24 +465,34 @@ async function loadEstoque() {
 async function openEstoqueModal(tipo) {
   const produtos = await api('/produtos');
   document.getElementById('modal-title').textContent = `Estoque - ${tipo}`;
+  const optionsHtml = produtos.length > 0
+    ? produtos.map(p => `<option value="${p.id}">${p.nome} (Est: ${p.quantidade})</option>`).join('')
+    : '<option value="">Nenhum produto cadastrado</option>';
   document.getElementById('modal-body').innerHTML = `
-    <div class="mb-3"><label class="form-label">Produto</label><select class="form-select" id="m-produto">${produtos.map(p => `<option value="${p.id}">${p.nome} (Est: ${p.quantidade})</option>`).join('')}</select></div>
+    <div class="mb-3"><label class="form-label">Produto</label><select class="form-select" id="m-produto">${optionsHtml}</select></div>
     <div class="mb-3"><label class="form-label">Quantidade</label><input type="number" class="form-control" id="m-quantidade" min="1" value="1"></div>
     <div class="mb-3"><label class="form-label">Motivo</label><input type="text" class="form-control" id="m-motivo" placeholder="Ex: Compra, Devolução..."></div>
   `;
-  document.getElementById('modal-save').onclick = async () => {
-    await api(`/estoque/${tipo.toLowerCase()}`, {
-      method: 'POST',
-      body: JSON.stringify({
-        produtoId: parseInt(document.getElementById('m-produto').value),
-        quantidade: parseInt(document.getElementById('m-quantidade').value),
-        motivo: document.getElementById('m-motivo').value
-      })
-    });
-    bootstrap.Modal.getInstance(document.getElementById('modal')).hide();
-    loadEstoque();
-    showToast(`${tipo} registrada com sucesso!`, 'success');
-  };
+  if (produtos.length === 0) {
+    document.getElementById('modal-save').disabled = true;
+    document.getElementById('modal-save').textContent = 'Cadastre produtos primeiro';
+  } else {
+    document.getElementById('modal-save').disabled = false;
+    document.getElementById('modal-save').textContent = 'Salvar';
+    document.getElementById('modal-save').onclick = async () => {
+      await api(`/estoque/${tipo.toLowerCase()}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          produtoId: parseInt(document.getElementById('m-produto').value),
+          quantidade: parseInt(document.getElementById('m-quantidade').value),
+          motivo: document.getElementById('m-motivo').value
+        })
+      });
+      bootstrap.Modal.getInstance(document.getElementById('modal')).hide();
+      loadEstoque();
+      showToast(`${tipo} registrada com sucesso!`, 'success');
+    };
+  }
   new bootstrap.Modal(document.getElementById('modal')).show();
 }
 
