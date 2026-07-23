@@ -411,9 +411,10 @@ async function openProdutoModal(id = null) {
       <div class="col-md-4"><label class="form-label">Marca</label><input type="text" class="form-control" id="m-marca" value="${produto.marca || ''}"></div>
       <div class="col-md-4"><label class="form-label">Unidade</label><input type="text" class="form-control" id="m-unidade" value="${produto.unidade || 'UN'}"></div>
       <div class="col-md-4"><label class="form-label">Validade</label><input type="date" class="form-control" id="m-validade" value="${produto.validade ? produto.validade.split('T')[0] : ''}"></div>
-      <div class="col-md-4"><label class="form-label">Preço Custo</label><input type="number" class="form-control" id="m-precoCusto" value="${produto.precoCusto || 0}" step="0.01"></div>
-      <div class="col-md-4"><label class="form-label">Preço Venda</label><input type="number" class="form-control" id="m-precoVenda" value="${produto.precoVenda || 0}" step="0.01"></div>
-      <div class="col-md-4"><label class="form-label">Estoque Mínimo</label><input type="number" class="form-control" id="m-estoqueMinimo" value="${produto.estoqueMinimo || 0}"></div>
+      <div class="col-md-3"><label class="form-label">Preço Custo</label><input type="number" class="form-control" id="m-precoCusto" value="${produto.precoCusto || 0}" step="0.01"></div>
+      <div class="col-md-3"><label class="form-label">Preço Venda</label><input type="number" class="form-control" id="m-precoVenda" value="${produto.precoVenda || 0}" step="0.01"></div>
+      <div class="col-md-3"><label class="form-label">Quantidade</label><input type="number" class="form-control" id="m-quantidade" value="${produto.quantidade || 0}"></div>
+      <div class="col-md-3"><label class="form-label">Estoque Mínimo</label><input type="number" class="form-control" id="m-estoqueMinimo" value="${produto.estoqueMinimo || 0}"></div>
       <div class="col-md-12"><label class="form-label">Descrição</label><textarea class="form-control" id="m-descricao">${produto.descricao || ''}</textarea></div>
     </div>
   `;
@@ -429,6 +430,7 @@ async function openProdutoModal(id = null) {
       validade: document.getElementById('m-validade').value || null,
       precoCusto: parseFloat(document.getElementById('m-precoCusto').value) || 0,
       precoVenda: parseFloat(document.getElementById('m-precoVenda').value) || 0,
+      quantidade: parseInt(document.getElementById('m-quantidade').value) || 0,
       estoqueMinimo: parseInt(document.getElementById('m-estoqueMinimo').value) || 0,
       descricao: document.getElementById('m-descricao').value || null
     };
