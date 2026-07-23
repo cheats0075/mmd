@@ -407,24 +407,504 @@ hr {
 .badge-warning { background: var(--warning); color: #000; }
 
 /* PDV */
-#pdv-carrinho tr td {
-  padding: 0.5rem;
-  vertical-align: middle;
-  border-bottom: 1px solid var(--border) !important;
+.pdv-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  background: #0a0e1a;
+  color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-#pdv-carrinho tr th {
-  border-bottom: 2px solid var(--border) !important;
+.pdv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #1a1f36 0%, #0d1225 100%);
+  border-bottom: 2px solid #2563eb;
 }
 
-#page-pdv .card {
-  border: 1px solid var(--border) !important;
+.pdv-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-#page-pdv .form-control, #page-pdv .form-select {
-  border: 1px solid var(--border) !important;
-  color: var(--text) !important;
-  background: var(--card-bg) !important;
+.pdv-header-left i {
+  font-size: 1.5rem;
+  color: #2563eb;
+}
+
+.pdv-store-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.pdv-header-center {
+  font-size: 1.1rem;
+  color: #94a3b8;
+}
+
+.pdv-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.pdv-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.pdv-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 10px;
+}
+
+.pdv-right {
+  width: 380px;
+  background: #111827;
+  border-left: 2px solid #1e293b;
+  display: flex;
+  flex-direction: column;
+}
+
+/* PDV SEARCH */
+.pdv-search-bar {
+  display: flex;
+  align-items: center;
+  background: #1e293b;
+  border: 2px solid #334155;
+  border-radius: 10px;
+  padding: 8px 12px;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+
+.pdv-search-bar:focus-within {
+  border-color: #2563eb;
+}
+
+.pdv-search-bar i {
+  font-size: 1.3rem;
+  color: #2563eb;
+}
+
+.pdv-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.pdv-search-input::placeholder {
+  color: #64748b;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.pdv-search-btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.pdv-search-btn:hover {
+  background: #1d4ed8;
+}
+
+/* PDV SEARCH RESULTS */
+.pdv-search-results {
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.pdv-search-results .pdv-result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pdv-search-results .pdv-result-item:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.pdv-result-item .pdv-result-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.pdv-result-item .pdv-result-code {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.pdv-result-item .pdv-result-price {
+  font-weight: 700;
+  color: #22c55e;
+  font-size: 1rem;
+}
+
+.pdv-result-item .pdv-result-stock {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* PDV CART TABLE */
+.pdv-cart {
+  flex: 1;
+  overflow-y: auto;
+  background: #0f172a;
+  border-radius: 10px;
+  border: 1px solid #1e293b;
+}
+
+.pdv-cart-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pdv-cart-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.pdv-cart-table th {
+  background: #1e293b;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 10px 8px;
+  text-align: center;
+  border-bottom: 2px solid #334155;
+}
+
+.pdv-cart-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #1e293b;
+  text-align: center;
+  color: #e2e8f0;
+  font-size: 0.9rem;
+}
+
+.pdv-cart-table tr:hover td {
+  background: #1e293b;
+}
+
+.pdv-empty-row td {
+  text-align: center;
+  padding: 40px 20px;
+  color: #475569;
+}
+
+.pdv-empty-row i {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.pdv-empty-row p {
+  font-size: 1.1rem;
+  margin: 0;
+  color: #64748b;
+}
+
+.pdv-empty-row small {
+  color: #475569;
+}
+
+.pdv-cart-table input {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+  padding: 4px;
+  width: 60px;
+  font-size: 0.85rem;
+}
+
+.pdv-cart-table input:focus {
+  border-color: #2563eb;
+  outline: none;
+}
+
+.pdv-cart-table .pdv-btn-remove {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.pdv-cart-table .pdv-btn-remove:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+.pdv-cart-footer {
+  background: #1e293b;
+  padding: 8px 14px;
+  font-size: 0.75rem;
+  color: #64748b;
+  text-align: center;
+  border-top: 1px solid #334155;
+}
+
+/* PDV PAYMENT PANEL */
+.pdv-payment-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+}
+
+.pdv-totals {
+  margin-bottom: 16px;
+}
+
+.pdv-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  font-size: 1rem;
+  color: #94a3b8;
+  border-bottom: 1px solid #1e293b;
+}
+
+.pdv-discount-row {
+  border-bottom: 1px solid #1e293b;
+}
+
+.pdv-discount-input {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pdv-discount-input span {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.pdv-input-sm {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 10px;
+  width: 100px;
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+.pdv-input-sm:focus {
+  border-color: #2563eb;
+  outline: none;
+}
+
+.pdv-total-final {
+  border-bottom: none;
+  padding: 16px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.pdv-total-final span:last-child {
+  font-size: 2rem;
+  color: #22c55e;
+  font-weight: 800;
+}
+
+/* PAYMENT METHODS */
+.pdv-payment-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #64748b;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.pdv-payment-methods {
+  margin-bottom: 16px;
+}
+
+.pdv-payment-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.pdv-pay-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  background: #1e293b;
+  border: 2px solid #334155;
+  border-radius: 10px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.75rem;
+}
+
+.pdv-pay-btn i {
+  font-size: 1.3rem;
+}
+
+.pdv-pay-btn:hover {
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.pdv-pay-btn.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+/* RECEIVED */
+.pdv-received {
+  margin-bottom: 16px;
+}
+
+.pdv-received-input {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #1e293b;
+  border: 2px solid #334155;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.pdv-received-input span {
+  color: #64748b;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.pdv-input-lg {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: right;
+  outline: none;
+}
+
+.pdv-input-lg:focus {
+  outline: none;
+}
+
+.pdv-troco {
+  text-align: right;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  margin-top: 6px;
+  padding-right: 4px;
+}
+
+.pdv-troco strong {
+  color: #22c55e;
+  font-size: 1rem;
+}
+
+/* PDV ACTIONS */
+.pdv-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.pdv-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.pdv-btn-success {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
+}
+
+.pdv-btn-success:hover {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  transform: translateY(-1px);
+}
+
+.pdv-btn-danger {
+  background: transparent;
+  border: 2px solid #ef4444;
+  color: #ef4444;
+}
+
+.pdv-btn-danger:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* PDV INFO */
+.pdv-info {
+  display: flex;
+  justify-content: space-between;
+  color: #475569;
+  font-size: 0.75rem;
+  padding-top: 8px;
+  border-top: 1px solid #1e293b;
 }
 
 /* ANIMATIONS */

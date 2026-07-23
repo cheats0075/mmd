@@ -23,6 +23,49 @@ document.addEventListener('DOMContentLoaded', () => {
   initEventListeners();
 });
 
+// PDV CLOCK
+function updatePDVClock() {
+  const now = new Date();
+  const time = now.toLocaleTimeString('pt-BR');
+  const date = now.toLocaleDateString('pt-BR');
+  const clockEl = document.getElementById('pdv-clock');
+  const horaEl = document.getElementById('pdv-hora');
+  if (clockEl) clockEl.textContent = time;
+  if (horaEl) horaEl.textContent = `${date} - ${time}`;
+}
+
+setInterval(updatePDVClock, 1000);
+
+// PDV PAYMENT SELECTION
+let pagamentoAtual = 'DINHEIRO';
+
+function selectPagamento(tipo, btn) {
+  pagamentoAtual = tipo;
+  document.getElementById('pdv-pagamento').value = tipo;
+  document.querySelectorAll('.pdv-pay-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  toggleTroco();
+}
+
+// KEYBOARD SHORTCUTS
+document.addEventListener('keydown', (e) => {
+  if (!currentUser) return;
+  const pdvPage = document.getElementById('page-pdv');
+  if (!pdvPage || !pdvPage.classList.contains('active')) return;
+
+  if (e.key === 'F1') {
+    e.preventDefault();
+    document.getElementById('pdv-busca').focus();
+  }
+  if (e.key === 'F9') {
+    e.preventDefault();
+    finalizarVenda();
+  }
+  if (e.key === 'Escape') {
+    cancelarVenda();
+  }
+});
+
 function initEventListeners() {
   document.getElementById('login-form').addEventListener('submit', handleLogin);
   document.getElementById('senha-form').addEventListener('submit', handleAlterarSenha);
@@ -50,7 +93,6 @@ function initEventListeners() {
   document.getElementById('pdv-busca-btn').addEventListener('click', searchProdutoPDV);
   document.getElementById('pdv-desconto').addEventListener('input', updatePDVTotals);
   document.getElementById('pdv-recebido').addEventListener('input', updatePDVTroco);
-  document.getElementById('pdv-pagamento').addEventListener('change', toggleTroco);
   document.getElementById('pdv-finalizar').addEventListener('click', finalizarVenda);
   document.getElementById('pdv-cancelar').addEventListener('click', cancelarVenda);
 
@@ -176,6 +218,9 @@ function showApp() {
   document.getElementById('senha-screen').classList.add('d-none');
   document.getElementById('app').classList.remove('d-none');
   document.getElementById('user-name').textContent = currentUser.nome;
+  const pdvOperator = document.getElementById('pdv-operator');
+  if (pdvOperator) pdvOperator.textContent = currentUser.nome;
+  updatePDVClock();
   loadDashboard();
   toggleTroco();
 }
@@ -261,12 +306,18 @@ async function searchProdutoPDV() {
   try {
     const produtos = await api(`/produtos?search=${encodeURIComponent(busca)}`);
     const html = produtos.map(p =>
-      `<div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2" style="cursor:pointer" onclick="adicionarAoCarrinho(${p.id}, '${p.nome.replace(/'/g, "\\'")}', ${p.precoVenda}, ${p.quantidade})">
-        <span><strong>${p.nome}</strong> <small class="text-muted">${p.codigoBarras || ''}</small></span>
-        <span>R$ ${Number(p.precoVenda).toFixed(2).replace('.', ',')} | Est: ${p.quantidade}</span>
+      `<div class="pdv-result-item" onclick="adicionarAoCarrinho(${p.id}, '${p.nome.replace(/'/g, "\\'")}', ${p.precoVenda}, ${p.quantidade})">
+        <div>
+          <div class="pdv-result-name">${p.nome}</div>
+          <div class="pdv-result-code">${p.codigoBarras || p.codigoInterno || ''}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="pdv-result-price">R$ ${Number(p.precoVenda).toFixed(2).replace('.', ',')}</div>
+          <div class="pdv-result-stock">Est: ${p.quantidade}</div>
+        </div>
       </div>`
     ).join('');
-    document.getElementById('pdv-resultados').innerHTML = `<div class="list-group">${html}</div>`;
+    document.getElementById('pdv-resultados').innerHTML = html;
   } catch (error) {}
 }
 
@@ -287,17 +338,32 @@ function adicionarAoCarrinho(id, nome, preco, estoque) {
 
 function updateCarrinho() {
   const tbody = document.getElementById('pdv-carrinho');
-  tbody.innerHTML = carrinho.map((item, idx) =>
-    `<tr>
-      <td>${idx + 1}</td>
-      <td>${item.nome}</td>
-      <td><input type="number" class="form-control form-control-sm" style="width:60px" value="${item.quantidade}" min="1" onchange="alterarQtdCarrinho(${idx}, this.value)"></td>
-      <td>R$ ${item.precoUnit.toFixed(2).replace('.', ',')}</td>
-      <td><input type="number" class="form-control form-control-sm" style="width:70px" value="${item.desconto}" min="0" step="0.01" onchange="alterarDescCarrinho(${idx}, this.value)"></td>
-      <td>R$ ${((item.precoUnit * item.quantidade) - item.desconto).toFixed(2).replace('.', ',')}</td>
-      <td><button class="btn btn-sm btn-outline-danger" onclick="removerItemCarrinho(${idx})"><i class="bi bi-trash"></i></button></td>
-    </tr>`
-  ).join('');
+  const itemCount = document.getElementById('pdv-item-count');
+
+  if (carrinho.length === 0) {
+    tbody.innerHTML = `
+      <tr class="pdv-empty-row">
+        <td colspan="7">
+          <i class="bi bi-cart-x"></i>
+          <p>Carrinho vazio</p>
+          <small>Busque um produto para adicionar</small>
+        </td>
+      </tr>`;
+    if (itemCount) itemCount.textContent = '0';
+  } else {
+    tbody.innerHTML = carrinho.map((item, idx) =>
+      `<tr>
+        <td>${idx + 1}</td>
+        <td style="text-align:left;font-weight:600">${item.nome}</td>
+        <td><input type="number" value="${item.quantidade}" min="1" onchange="alterarQtdCarrinho(${idx}, this.value)"></td>
+        <td>R$ ${item.precoUnit.toFixed(2).replace('.', ',')}</td>
+        <td><input type="number" value="${item.desconto}" min="0" step="0.01" onchange="alterarDescCarrinho(${idx}, this.value)" style="width:70px"></td>
+        <td style="font-weight:700;color:#22c55e">R$ ${((item.precoUnit * item.quantidade) - item.desconto).toFixed(2).replace('.', ',')}</td>
+        <td><button class="pdv-btn-remove" onclick="removerItemCarrinho(${idx})"><i class="bi bi-trash-fill"></i></button></td>
+      </tr>`
+    ).join('');
+    if (itemCount) itemCount.textContent = carrinho.length;
+  }
   updatePDVTotals();
 }
 
@@ -333,16 +399,19 @@ function updatePDVTroco() {
 }
 
 function toggleTroco() {
-  const pgto = document.getElementById('pdv-pagamento').value;
-  document.getElementById('pdv-troco-group').style.display = pgto === 'DINHEIRO' ? 'block' : 'none';
+  const trocoGroup = document.getElementById('pdv-troco-group');
+  if (pagamentoAtual === 'DINHEIRO') {
+    trocoGroup.style.display = 'block';
+  } else {
+    trocoGroup.style.display = 'none';
+  }
 }
 
 async function finalizarVenda() {
   if (carrinho.length === 0) { showToast('Carrinho vazio', 'warning'); return; }
   const total = parseFloat(document.getElementById('pdv-total').textContent.replace('R$', '').replace(',', '.')) || 0;
   const recebido = parseFloat(document.getElementById('pdv-recebido').value) || 0;
-  const formaPagamento = document.getElementById('pdv-pagamento').value;
-  if (formaPagamento === 'DINHEIRO' && recebido < total) {
+  if (pagamentoAtual === 'DINHEIRO' && recebido < total) {
     showToast('Valor recebido insuficiente', 'warning');
     return;
   }
@@ -351,7 +420,7 @@ async function finalizarVenda() {
       method: 'POST',
       body: JSON.stringify({
         itens: carrinho.map(item => ({ produtoId: item.produtoId, quantidade: item.quantidade, precoUnit: item.precoUnit, desconto: item.desconto })),
-        pagamentos: [{ formaPagamento, valor: recebido || total, troco: Math.max(0, recebido - total) }],
+        pagamentos: [{ formaPagamento: pagamentoAtual, valor: recebido || total, troco: Math.max(0, recebido - total) }],
         desconto: parseFloat(document.getElementById('pdv-desconto').value) || 0
       })
     });
@@ -367,7 +436,7 @@ async function finalizarVenda() {
           ${carrinho.map(item => `<tr><td style="text-align:left;">${item.nome}</td><td>${item.quantidade}x</td><td style="text-align:right;">R$ ${((item.precoUnit * item.quantidade) - item.desconto).toFixed(2).replace('.', ',')}</td></tr>`).join('')}
         </table>
         <hr>
-        <p><strong>Pagamento:</strong> ${formaPagamento}</p>
+        <p><strong>Pagamento:</strong> ${pagamentoAtual}</p>
         <h4>TOTAL: R$ ${total.toFixed(2).replace('.', ',')}</h4>
         ${troco > 0 ? `<h5>Troco: R$ ${troco.toFixed(2).replace('.', ',')}</h5>` : ''}
         <hr>

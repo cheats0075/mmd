@@ -215,60 +215,147 @@
 
         <!-- PDV -->
         <div id="page-pdv" class="page">
-          <h4 class="mb-4"><i class="bi bi-printer"></i> Frente de Caixa (PDV)</h4>
-          <div class="row g-3">
-            <div class="col-md-8">
-              <div class="card">
-                <div class="card-body">
-                  <div class="input-group mb-3">
-                    <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
-                    <input type="text" class="form-control" id="pdv-busca" placeholder="Escaneie ou digite o código/nome do produto..." autofocus>
-                    <button class="btn btn-primary" id="pdv-busca-btn"><i class="bi bi-search"></i></button>
-                  </div>
-                  <div id="pdv-resultados" class="mb-3" style="max-height:200px;overflow-y:auto;"></div>
-                  <div class="table-responsive">
-                    <table class="table table-sm">
-                      <thead><tr><th>Item</th><th>Produto</th><th>Qtd</th><th>Preço</th><th>Desc</th><th>Total</th><th></th></tr></thead>
-                      <tbody id="pdv-carrinho"></tbody>
-                    </table>
-                  </div>
-                </div>
+          <div class="pdv-container">
+            <!-- HEADER DO PDV -->
+            <div class="pdv-header">
+              <div class="pdv-header-left">
+                <i class="bi bi-cart4"></i>
+                <span class="pdv-store-name">SuperMercado</span>
+              </div>
+              <div class="pdv-header-center">
+                <span id="pdv-hora"></span>
+              </div>
+              <div class="pdv-header-right">
+                <i class="bi bi-person-circle"></i>
+                <span id="pdv-operator">Administrador</span>
               </div>
             </div>
-            <div class="col-md-4">
-              <div class="card">
-                <div class="card-body text-center">
-                  <h6>Subtotal</h6>
-                  <h3 id="pdv-subtotal">R$ 0,00</h3>
-                  <hr>
-                  <div class="mb-3">
-                    <label class="form-label">Desconto (R$)</label>
-                    <input type="number" class="form-control" id="pdv-desconto" value="0" min="0" step="0.01">
+
+            <!-- CORPO DO PDV -->
+            <div class="pdv-body">
+              <!-- LADO ESQUERDO - CARRINHO -->
+              <div class="pdv-left">
+                <!-- BUSCA -->
+                <div class="pdv-search-bar">
+                  <i class="bi bi-upc-scan"></i>
+                  <input type="text" class="pdv-search-input" id="pdv-busca" placeholder="ESCANEIE OU DIGITE O CÓDIGO / NOME DO PRODUTO..." autofocus>
+                  <button class="pdv-search-btn" id="pdv-busca-btn"><i class="bi bi-search"></i> Buscar</button>
+                </div>
+
+                <!-- RESULTADOS DA BUSCA -->
+                <div id="pdv-resultados" class="pdv-search-results"></div>
+
+                <!-- TABELA DO CARRINHO -->
+                <div class="pdv-cart">
+                  <table class="pdv-cart-table">
+                    <thead>
+                      <tr>
+                        <th style="width:5%">#</th>
+                        <th style="width:35%">PRODUTO</th>
+                        <th style="width:12%">QTD</th>
+                        <th style="width:15%">PREÇO UN.</th>
+                        <th style="width:12%">DESC.</th>
+                        <th style="width:15%">TOTAL</th>
+                        <th style="width:6%"></th>
+                      </tr>
+                    </thead>
+                    <tbody id="pdv-carrinho">
+                      <tr class="pdv-empty-row">
+                        <td colspan="7">
+                          <i class="bi bi-cart-x"></i>
+                          <p>Carrinho vazio</p>
+                          <small>Busque um produto para adicionar</small>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- FOOTER DO CARRINHO -->
+                <div class="pdv-cart-footer">
+                  <span><i class="bi bi-info-circle"></i> F1 = Buscar | F2 = Quantidade | F9 = Finalizar | ESC = Cancelar</span>
+                </div>
+              </div>
+
+              <!-- LADO DIREITO - PAGAMENTO -->
+              <div class="pdv-right">
+                <div class="pdv-payment-panel">
+                  <!-- SUBTOTAL -->
+                  <div class="pdv-totals">
+                    <div class="pdv-total-row">
+                      <span>Subtotal</span>
+                      <span id="pdv-subtotal">R$ 0,00</span>
+                    </div>
+                    <div class="pdv-total-row pdv-discount-row">
+                      <span>Desconto</span>
+                      <div class="pdv-discount-input">
+                        <span>R$</span>
+                        <input type="number" class="pdv-input-sm" id="pdv-desconto" value="0" min="0" step="0.01">
+                      </div>
+                    </div>
+                    <div class="pdv-total-row pdv-total-final">
+                      <span>TOTAL</span>
+                      <span id="pdv-total">R$ 0,00</span>
+                    </div>
                   </div>
-                  <h4>TOTAL</h4>
-                  <h2 class="text-success" id="pdv-total">R$ 0,00</h2>
-                  <hr>
-                  <div class="mb-3">
-                    <label class="form-label">Forma de Pagamento</label>
-                    <select class="form-select" id="pdv-pagamento">
-                      <option value="DINHEIRO">Dinheiro</option>
-                      <option value="PIX">PIX</option>
-                      <option value="CARTAO_CREDITO">Cartão Crédito</option>
-                      <option value="CARTAO_DEBITO">Cartão Débito</option>
-                      <option value="VALE">Vale</option>
-                    </select>
+
+                  <!-- FORMAS DE PAGAMENTO -->
+                  <div class="pdv-payment-methods">
+                    <input type="hidden" id="pdv-pagamento" value="DINHEIRO">
+                    <label class="pdv-payment-label">FORMA DE PAGAMENTO</label>
+                    <div class="pdv-payment-buttons">
+                      <button class="pdv-pay-btn active" data-pagamento="DINHEIRO" onclick="selectPagamento('DINHEIRO', this)">
+                        <i class="bi bi-cash"></i>
+                        <span>Dinheiro</span>
+                      </button>
+                      <button class="pdv-pay-btn" data-pagamento="PIX" onclick="selectPagamento('PIX', this)">
+                        <i class="bi bi-qr-code"></i>
+                        <span>PIX</span>
+                      </button>
+                      <button class="pdv-pay-btn" data-pagamento="CARTAO_CREDITO" onclick="selectPagamento('CARTAO_CREDITO', this)">
+                        <i class="bi bi-credit-card"></i>
+                        <span>Crédito</span>
+                      </button>
+                      <button class="pdv-pay-btn" data-pagamento="CARTAO_DEBITO" onclick="selectPagamento('CARTAO_DEBITO', this)">
+                        <i class="bi bi-credit-card-2-front"></i>
+                        <span>Débito</span>
+                      </button>
+                      <button class="pdv-pay-btn" data-pagamento="VALE" onclick="selectPagamento('VALE', this)">
+                        <i class="bi bi-ticket"></i>
+                        <span>Vale</span>
+                      </button>
+                    </div>
                   </div>
-                  <div class="mb-3" id="pdv-troco-group">
-                    <label class="form-label">Valor Recebido</label>
-                    <input type="number" class="form-control" id="pdv-recebido" value="0" step="0.01">
-                    <small class="text-muted">Troco: <strong id="pdv-troco">R$ 0,00</strong></small>
+
+                  <!-- VALOR RECEBIDO (só para dinheiro) -->
+                  <div class="pdv-received" id="pdv-troco-group">
+                    <label class="pdv-payment-label">VALOR RECEBIDO</label>
+                    <div class="pdv-received-input">
+                      <span>R$</span>
+                      <input type="number" class="pdv-input-lg" id="pdv-recebido" value="0" step="0.01">
+                    </div>
+                    <div class="pdv-troco">
+                      Troco: <strong id="pdv-troco">R$ 0,00</strong>
+                    </div>
                   </div>
-                  <button class="btn btn-success btn-lg w-100 mb-2" id="pdv-finalizar">
-                    <i class="bi bi-check-circle"></i> Finalizar Venda
-                  </button>
-                  <button class="btn btn-outline-danger w-100" id="pdv-cancelar">
-                    <i class="bi bi-x-circle"></i> Cancelar Venda
-                  </button>
+
+                  <!-- BOTÕES DE AÇÃO -->
+                  <div class="pdv-actions">
+                    <button class="pdv-btn pdv-btn-success" id="pdv-finalizar">
+                      <i class="bi bi-check-circle-fill"></i>
+                      FINALIZAR VENDA
+                    </button>
+                    <button class="pdv-btn pdv-btn-danger" id="pdv-cancelar">
+                      <i class="bi bi-x-circle"></i>
+                      CANCELAR
+                    </button>
+                  </div>
+
+                  <!-- INFO -->
+                  <div class="pdv-info">
+                    <span><i class="bi bi-cart3"></i> <span id="pdv-item-count">0</span> itens</span>
+                    <span><i class="bi bi-clock"></i> <span id="pdv-clock"></span></span>
+                  </div>
                 </div>
               </div>
             </div>
