@@ -109,6 +109,20 @@ function initEventListeners() {
   document.getElementById('pdv-finalizar').addEventListener('click', finalizarVenda);
   document.getElementById('pdv-cancelar').addEventListener('click', cancelarVenda);
 
+  // PDV - Enter key handler for quick add
+  document.getElementById('pdv-busca').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (pdvUltimoResultado) {
+        const p = pdvUltimoResultado;
+        adicionarAoCarrinho(p.id, p.nome, p.precoVenda, p.quantidade, p.unidade || 'UN');
+        pdvUltimoResultado = null;
+      } else {
+        searchProdutoPDV();
+      }
+    }
+  });
+
   document.getElementById('btn-novo-produto').addEventListener('click', () => openProdutoModal());
   document.getElementById('btn-novo-cliente').addEventListener('click', () => openClienteModal());
   document.getElementById('btn-novo-fornecedor').addEventListener('click', () => openFornecedorModal());
@@ -312,37 +326,202 @@ async function loadDashboard() {
   } catch (error) {}
 }
 
-// PDV
-async function searchProdutoPDV() {
-  const busca = document.getElementById('pdv-busca').value;
-  if (busca.length < 2) { document.getElementById('pdv-resultados').innerHTML = ''; return; }
-  try {
-    const produtos = await api(`/produtos?search=${encodeURIComponent(busca)}`);
-    const html = produtos.map(p =>
-      `<div class="pdv-result-item" onclick="adicionarAoCarrinho(${p.id}, '${p.nome.replace(/'/g, "\\'")}', ${p.precoVenda}, ${p.quantidade})">
-        <div>
-          <div class="pdv-result-name">${p.nome}</div>
-          <div class="pdv-result-code">${p.codigoBarras || p.codigoInterno || ''}</div>
-        </div>
-        <div style="text-align:right">
-          <div class="pdv-result-price">R$ ${Number(p.precoVenda).toFixed(2).replace('.', ',')}</div>
-          <div class="pdv-result-stock">Est: ${p.quantidade}</div>
-        </div>
-      </div>`
-    ).join('');
-    document.getElementById('pdv-resultados').innerHTML = html;
-  } catch (error) {}
+// PDV - UTILITY FUNCTIONS
+function isProdutoPesado(unidade) {
+  const unidadesPeso = ['KG', 'LT', 'L', 'G', 'ML', 'M2', 'M3', 'MT', 'M'];
+  return unidadesPeso.includes(unidade?.toUpperCase());
 }
 
-function adicionarAoCarrinho(id, nome, preco, estoque) {
-  const item = carrinho.find(i => i.produtoId === id);
-  if (item) {
-    if (item.quantidade >= estoque) { showToast('Estoque insuficiente', 'warning'); return; }
-    item.quantidade++;
-  } else {
-    if (estoque <= 0) { showToast('Produto sem estoque', 'warning'); return; }
-    carrinho.push({ produtoId: id, nome, precoUnit: preco, quantidade: 1, desconto: 0 });
+function formatPeso(peso, unidade) {
+  if (!unidade || unidade.toUpperCase() === 'UN') return peso;
+  return `${peso.toFixed(3)} ${unidade}`;
+}
+
+// PDV - SEARCH
+let pdvUltimoResultado = null;
+let pdvBuscaTimeout = null;
+
+async function searchProdutoPDV() {
+  const busca = document.getElementById('pdv-busca').value;
+  if (busca.length < 2) { 
+    document.getElementById('pdv-resultados').innerHTML = ''; 
+    pdvUltimoResultado = null;
+    return; 
   }
+  
+  try {
+    const produtos = await api(`/produtos?search=${encodeURIComponent(busca)}`);
+    
+    if (produtos.length === 0) {
+      document.getElementById('pdv-resultados').innerHTML = '<div class="pdv-no-results">Nenhum produto encontrado</div>';
+      pdvUltimoResultado = null;
+      return;
+    }
+
+    // Se only 1 product found, store it for auto-add on Enter
+    if (produtos.length === 1) {
+      pdvUltimoResultado = produtos[0];
+    } else {
+      pdvUltimoResultado = null;
+    }
+
+    const html = produtos.map(p => {
+      const unidade = p.unidade || 'UN';
+      const isPesado = isProdutoPesado(unidade);
+      const estoque = Number(p.quantidade);
+      
+      return `<div class="pdv-result-item" onclick="adicionarAoCarrinho(${p.id}, '${p.nome.replace(/'/g, "\\'")}', ${p.precoVenda}, ${p.quantidade}, '${unidade}')">
+        <div>
+          <div class="pdv-result-name">${escapeHtml(p.nome)}</div>
+          <div class="pdv-result-code">${p.codigoBarras || p.codigoInterno || ''} ${isPesado ? '<span class="badge bg-info">PESADO</span>' : ''}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="pdv-result-price">R$ ${Number(p.precoVenda).toFixed(2).replace('.', ',')}/${unidade}</div>
+          <div class="pdv-result-stock">Est: ${estoque} ${unidade}</div>
+        </div>
+      </div>`;
+    }).join('');
+    document.getElementById('pdv-resultados').innerHTML = html;
+  } catch (error) {
+    console.error('Erro na busca PDV:', error);
+  }
+}
+
+// PDV - ADD TO CART
+function adicionarAoCarrinho(id, nome, preco, estoque, unidade = 'UN') {
+  const isPesado = isProdutoPesado(unidade);
+  
+  if (isPesado) {
+    // Show weight input modal for weighted products
+    showPesoModal(id, nome, preco, estoque, unidade);
+  } else {
+    // Add directly for non-weighted products
+    addItemCarrinho(id, nome, preco, estoque, unidade, 1);
+  }
+}
+
+function showPesoModal(produtoId, nome, preco, estoque, unidade) {
+  const modalHtml = `
+    <div class="modal fade" id="peso-modal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"><i class="bi bi-speedometer"></i> Informar Peso</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="text-center mb-3">
+              <h4>${escapeHtml(nome)}</h4>
+              <p class="text-muted">Preço: R$ ${Number(preco).toFixed(2).replace('.', ',')}/${unidade}</p>
+              <p class="text-muted">Estoque disponível: ${estoque} ${unidade}</p>
+            </div>
+            <div class="input-group input-group-lg">
+              <input type="number" class="form-control text-center" id="peso-input" 
+                     step="0.001" min="0.001" max="${estoque}" 
+                     placeholder="0,000" autofocus>
+              <span class="input-group-text">${unidade}</span>
+            </div>
+            <div class="text-center mt-2">
+              <h3 id="peso-total">R$ 0,00</h3>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="confirmarPeso(${produtoId}, '${nome.replace(/'/g, "\\'")}', ${preco}, ${estoque}, '${unidade}')">
+              <i class="bi bi-check-lg"></i> Adicionar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Remove existing modal if any
+  const existingModal = document.getElementById('peso-modal');
+  if (existingModal) existingModal.remove();
+  
+  // Add modal to body
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  
+  const modal = new bootstrap.Modal(document.getElementById('peso-modal'));
+  modal.show();
+  
+  // Update total on input
+  const pesoInput = document.getElementById('peso-input');
+  const pesoTotal = document.getElementById('peso-total');
+  
+  pesoInput.addEventListener('input', () => {
+    const peso = parseFloat(pesoInput.value) || 0;
+    const total = peso * Number(preco);
+    pesoTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+  });
+  
+  // Confirm on Enter key
+  pesoInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      confirmarPeso(produtoId, nome, preco, estoque, unidade);
+    }
+  });
+  
+  // Focus on input after modal shown
+  document.getElementById('peso-modal').addEventListener('shown.bs.modal', () => {
+    pesoInput.focus();
+  });
+}
+
+function confirmarPeso(produtoId, nome, preco, estoque, unidade) {
+  const pesoInput = document.getElementById('peso-input');
+  const peso = parseFloat(pesoInput.value) || 0;
+  
+  if (peso <= 0) {
+    showToast('Informe um peso válido', 'warning');
+    return;
+  }
+  
+  if (peso > estoque) {
+    showToast('Peso excede o estoque disponível', 'warning');
+    return;
+  }
+  
+  addItemCarrinho(produtoId, nome, preco, estoque, unidade, peso);
+  
+  // Close modal
+  const modal = bootstrap.Modal.getInstance(document.getElementById('peso-modal'));
+  if (modal) modal.hide();
+  
+  // Clear search and focus
+  document.getElementById('pdv-busca').value = '';
+  document.getElementById('pdv-resultados').innerHTML = '';
+  document.getElementById('pdv-busca').focus();
+}
+
+function addItemCarrinho(id, nome, preco, estoque, unidade, quantidade) {
+  const item = carrinho.find(i => i.produtoId === id);
+  const qtd = unidade.toUpperCase() === 'UN' ? Math.floor(quantidade) : quantidade;
+  
+  if (item) {
+    const newQty = item.quantidade + qtd;
+    if (newQty > estoque) { 
+      showToast('Estoque insuficiente', 'warning'); 
+      return; 
+    }
+    item.quantidade = newQty;
+  } else {
+    if (qtd > estoque) { 
+      showToast('Estoque insuficiente', 'warning'); 
+      return; 
+    }
+    carrinho.push({ 
+      produtoId: id, 
+      nome, 
+      precoUnit: preco, 
+      quantidade: qtd, 
+      desconto: 0,
+      unidade 
+    });
+  }
+  
   updateCarrinho();
   document.getElementById('pdv-busca').value = '';
   document.getElementById('pdv-resultados').innerHTML = '';
@@ -364,24 +543,36 @@ function updateCarrinho() {
       </tr>`;
     if (itemCount) itemCount.textContent = '0';
   } else {
-    tbody.innerHTML = carrinho.map((item, idx) =>
-      `<tr>
+    tbody.innerHTML = carrinho.map((item, idx) => {
+      const unidade = item.unidade || 'UN';
+      const isPesado = isProdutoPesado(unidade);
+      const step = isPesado ? '0.001' : '1';
+      const min = isPesado ? '0.001' : '1';
+      
+      return `<tr>
         <td>${idx + 1}</td>
-        <td style="text-align:left;font-weight:600">${item.nome}</td>
-        <td><input type="number" value="${item.quantidade}" min="1" onchange="alterarQtdCarrinho(${idx}, this.value)"></td>
-        <td>R$ ${item.precoUnit.toFixed(2).replace('.', ',')}</td>
+        <td style="text-align:left;font-weight:600">
+          ${escapeHtml(item.nome)}
+          ${isPesado ? '<br><small class="text-muted">' + unidade + '</small>' : ''}
+        </td>
+        <td>
+          <input type="number" value="${item.quantidade}" min="${min}" step="${step}" 
+                 onchange="alterarQtdCarrinho(${idx}, this.value, '${unidade}')">
+        </td>
+        <td>R$ ${item.precoUnit.toFixed(2).replace('.', ',')}/${unidade}</td>
         <td><input type="number" value="${item.desconto}" min="0" step="0.01" onchange="alterarDescCarrinho(${idx}, this.value)" style="width:70px"></td>
         <td style="font-weight:700;color:#22c55e">R$ ${((item.precoUnit * item.quantidade) - item.desconto).toFixed(2).replace('.', ',')}</td>
         <td><button class="pdv-btn-remove" onclick="removerItemCarrinho(${idx})"><i class="bi bi-trash-fill"></i></button></td>
-      </tr>`
-    ).join('');
+      </tr>`;
+    }).join('');
     if (itemCount) itemCount.textContent = carrinho.length;
   }
   updatePDVTotals();
 }
 
-function alterarQtdCarrinho(idx, val) {
-  carrinho[idx].quantidade = parseInt(val) || 1;
+function alterarQtdCarrinho(idx, val, unidade = 'UN') {
+  const isPesado = isProdutoPesado(unidade);
+  carrinho[idx].quantidade = isPesado ? (parseFloat(val) || 0.001) : (parseInt(val) || 1);
   updateCarrinho();
 }
 
