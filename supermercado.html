@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SuperMercado - Sistema de GestÃ£o</title>
+  <title>SuperMercado - Sistema de Gestão</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
   <style>
@@ -934,11 +934,11 @@ hr {
       <div class="login-logo">
         <i class="bi bi-cart4"></i>
         <h2>SuperMercado</h2>
-        <p>Sistema de GestÃ£o</p>
+        <p>Sistema de Gestão</p>
       </div>
       <form id="login-form">
         <div class="mb-3">
-          <label class="form-label">UsuÃ¡rio</label>
+          <label class="form-label">Usuário</label>
           <div class="input-group">
             <span class="input-group-text"><i class="bi bi-person"></i></span>
             <input type="text" class="form-control" id="login-usuario" required>
@@ -967,7 +967,7 @@ hr {
   <div id="senha-screen" class="login-screen d-none">
     <div class="login-card">
       <h4 class="text-center mb-4"><i class="bi bi-key"></i> Alterar Senha</h4>
-      <p class="text-muted text-center">VocÃª deve alterar sua senha no primeiro login.</p>
+      <p class="text-muted text-center">Você deve alterar sua senha no primeiro login.</p>
       <form id="senha-form">
         <div class="mb-3">
           <label class="form-label">Senha Atual</label>
@@ -1001,11 +1001,11 @@ hr {
         <li><a href="#" class="nav-link" data-page="estoque"><i class="bi bi-boxes"></i><span>Estoque</span></a></li>
         <li><a href="#" class="nav-link" data-page="clientes"><i class="bi bi-people"></i><span>Clientes</span></a></li>
         <li><a href="#" class="nav-link" data-page="fornecedores"><i class="bi bi-truck"></i><span>Fornecedores</span></a></li>
-        <li><a href="#" class="nav-link" data-page="funcionarios"><i class="bi bi-person-badge"></i><span>FuncionÃ¡rios</span></a></li>
+        <li><a href="#" class="nav-link" data-page="funcionarios"><i class="bi bi-person-badge"></i><span>Funcionários</span></a></li>
         <li><a href="#" class="nav-link" data-page="caixa"><i class="bi bi-cash-stack"></i><span>Caixa</span></a></li>
         <li><a href="#" class="nav-link" data-page="financeiro"><i class="bi bi-currency-dollar"></i><span>Financeiro</span></a></li>
-        <li><a href="#" class="nav-link" data-page="relatorios"><i class="bi bi-file-earmark-bar-graph"></i><span>RelatÃ³rios</span></a></li>
-        <li><a href="#" class="nav-link" data-page="configuracoes"><i class="bi bi-gear"></i><span>ConfiguraÃ§Ãµes</span></a></li>
+        <li><a href="#" class="nav-link" data-page="relatorios"><i class="bi bi-file-earmark-bar-graph"></i><span>Relatórios</span></a></li>
+        <li><a href="#" class="nav-link" data-page="configuracoes"><i class="bi bi-gear"></i><span>Configurações</span></a></li>
         <li><a href="#" class="nav-link" data-page="auditoria"><i class="bi bi-shield-lock"></i><span>Auditoria</span></a></li>
       </ul>
       <div class="sidebar-footer">
@@ -1096,7 +1096,7 @@ hr {
             <div class="col-md-3">
               <div class="card stat-card">
                 <div class="card-body">
-                  <h6><i class="bi bi-graph-up"></i> Lucro DiÃ¡rio</h6>
+                  <h6><i class="bi bi-graph-up"></i> Lucro Diário</h6>
                   <h3 id="stat-lucro-diario">R$ 0,00</h3>
                 </div>
               </div>
@@ -1113,7 +1113,7 @@ hr {
           <div class="row g-3">
             <div class="col-md-8">
               <div class="card">
-                <div class="card-header"><h6>Ãšltimas Vendas</h6></div>
+                <div class="card-header"><h6>àšltimas Vendas</h6></div>
                 <div class="card-body p-0">
                   <div class="table-responsive">
                     <table class="table table-hover mb-0">
@@ -1160,7 +1160,7 @@ hr {
                 <!-- BUSCA -->
                 <div class="pdv-search-bar">
                   <i class="bi bi-upc-scan"></i>
-                  <input type="text" class="pdv-search-input" id="pdv-busca" placeholder="ESCANEIE OU DIGITE O CÃ“DIGO / NOME DO PRODUTO..." autofocus>
+                  <input type="text" class="pdv-search-input" id="pdv-busca" placeholder="ESCANEIE OU DIGITE O Cà“DIGO / NOME DO PRODUTO..." autofocus>
                   <button class="pdv-search-btn" id="pdv-busca-btn"><i class="bi bi-search"></i> Buscar</button>
                 </div>
 
@@ -1175,7 +1175,7 @@ hr {
                         <th style="width:5%">#</th>
                         <th style="width:35%">PRODUTO</th>
                         <th style="width:12%">QTD</th>
-                        <th style="width:15%">PREÃ‡O UN.</th>
+                        <th style="width:15%">PREà‡O UN.</th>
                         <th style="width:12%">DESC.</th>
                         <th style="width:15%">TOTAL</th>
                         <th style="width:6%"></th>
@@ -1236,11 +1236,11 @@ hr {
                       </button>
                       <button class="pdv-pay-btn" data-pagamento="CARTAO_CREDITO" onclick="selectPagamento('CARTAO_CREDITO', this)">
                         <i class="bi bi-credit-card"></i>
-                        <span>CrÃ©dito</span>
+                        <span>Crédito</span>
                       </button>
                       <button class="pdv-pay-btn" data-pagamento="CARTAO_DEBITO" onclick="selectPagamento('CARTAO_DEBITO', this)">
                         <i class="bi bi-credit-card-2-front"></i>
-                        <span>DÃ©bito</span>
+                        <span>Débito</span>
                       </button>
                       <button class="pdv-pay-btn" data-pagamento="VALE" onclick="selectPagamento('VALE', this)">
                         <i class="bi bi-ticket"></i>
@@ -1249,7 +1249,7 @@ hr {
                     </div>
                   </div>
 
-                  <!-- VALOR RECEBIDO (sÃ³ para dinheiro) -->
+                  <!-- VALOR RECEBIDO (só para dinheiro) -->
                   <div class="pdv-received" id="pdv-troco-group">
                     <label class="pdv-payment-label">VALOR RECEBIDO</label>
                     <div class="pdv-received-input">
@@ -1261,7 +1261,7 @@ hr {
                     </div>
                   </div>
 
-                  <!-- BOTÃ•ES DE AÃ‡ÃƒO -->
+                  <!-- BOTà•ES DE Aà‡àƒO -->
                   <div class="pdv-actions">
                     <button class="pdv-btn pdv-btn-success" id="pdv-finalizar">
                       <i class="bi bi-check-circle-fill"></i>
@@ -1295,7 +1295,7 @@ hr {
               <input type="text" class="form-control mb-3" id="busca-produtos" placeholder="Pesquisar produtos...">
               <div class="table-responsive">
                 <table class="table table-hover">
-                  <thead><tr><th>CÃ³digo</th><th>Nome</th><th>Categoria</th><th>PreÃ§o</th><th>Estoque</th><th>AÃ§Ãµes</th></tr></thead>
+                  <thead><tr><th>Código</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Estoque</th><th>Ações</th></tr></thead>
                   <tbody id="tabela-produtos"></tbody>
                 </table>
               </div>
@@ -1311,7 +1311,7 @@ hr {
               <button class="btn btn-success w-100" id="btn-entrada-estoque"><i class="bi bi-plus-circle"></i> Entrada</button>
             </div>
             <div class="col-md-4">
-              <button class="btn btn-warning w-100" id="btn-saida-estoque"><i class="bi bi-dash-circle"></i> SaÃ­da</button>
+              <button class="btn btn-warning w-100" id="btn-saida-estoque"><i class="bi bi-dash-circle"></i> Saída</button>
             </div>
             <div class="col-md-4">
               <button class="btn btn-info w-100" id="btn-ajuste-estoque"><i class="bi bi-pencil"></i> Ajuste</button>
@@ -1340,7 +1340,7 @@ hr {
               <input type="text" class="form-control mb-3" id="busca-clientes" placeholder="Pesquisar clientes...">
               <div class="table-responsive">
                 <table class="table table-hover">
-                  <thead><tr><th>Nome</th><th>CPF/CNPJ</th><th>Telefone</th><th>Email</th><th>AÃ§Ãµes</th></tr></thead>
+                  <thead><tr><th>Nome</th><th>CPF/CNPJ</th><th>Telefone</th><th>Email</th><th>Ações</th></tr></thead>
                   <tbody id="tabela-clientes"></tbody>
                 </table>
               </div>
@@ -1359,7 +1359,7 @@ hr {
               <input type="text" class="form-control mb-3" id="busca-fornecedores" placeholder="Pesquisar fornecedores...">
               <div class="table-responsive">
                 <table class="table table-hover">
-                  <thead><tr><th>RazÃ£o Social</th><th>CNPJ</th><th>Telefone</th><th>Cidade</th><th>AÃ§Ãµes</th></tr></thead>
+                  <thead><tr><th>Razão Social</th><th>CNPJ</th><th>Telefone</th><th>Cidade</th><th>Ações</th></tr></thead>
                   <tbody id="tabela-fornecedores"></tbody>
                 </table>
               </div>
@@ -1367,17 +1367,17 @@ hr {
           </div>
         </div>
 
-        <!-- FUNCIONÃRIOS -->
+        <!-- FUNCIONàRIOS -->
         <div id="page-funcionarios" class="page">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4>FuncionÃ¡rios / UsuÃ¡rios</h4>
-            <button class="btn btn-primary" id="btn-novo-funcionario"><i class="bi bi-plus-lg"></i> Novo FuncionÃ¡rio</button>
+            <h4>Funcionários / Usuários</h4>
+            <button class="btn btn-primary" id="btn-novo-funcionario"><i class="bi bi-plus-lg"></i> Novo Funcionário</button>
           </div>
           <div class="card">
             <div class="card-body">
               <div class="table-responsive">
                 <table class="table table-hover">
-                  <thead><tr><th>Nome</th><th>UsuÃ¡rio</th><th>Cargo</th><th>Status</th><th>AÃ§Ãµes</th></tr></thead>
+                  <thead><tr><th>Nome</th><th>Usuário</th><th>Cargo</th><th>Status</th><th>Ações</th></tr></thead>
                   <tbody id="tabela-funcionarios"></tbody>
                 </table>
               </div>
@@ -1406,7 +1406,7 @@ hr {
             </div>
           </div>
           <div class="card">
-            <div class="card-header"><h6>HistÃ³rico de Caixas</h6></div>
+            <div class="card-header"><h6>Histórico de Caixas</h6></div>
             <div class="card-body">
               <div class="table-responsive">
                 <table class="table table-hover">
@@ -1434,7 +1434,7 @@ hr {
               </div>
               <div class="table-responsive">
                 <table class="table table-hover">
-                  <thead><tr><th>DescriÃ§Ã£o</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>AÃ§Ãµes</th></tr></thead>
+                  <thead><tr><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr></thead>
                   <tbody id="tabela-pagar"></tbody>
                 </table>
               </div>
@@ -1446,7 +1446,7 @@ hr {
               </div>
               <div class="table-responsive">
                 <table class="table table-hover">
-                  <thead><tr><th>DescriÃ§Ã£o</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>AÃ§Ãµes</th></tr></thead>
+                  <thead><tr><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr></thead>
                   <tbody id="tabela-receber"></tbody>
                 </table>
               </div>
@@ -1456,7 +1456,7 @@ hr {
                 <div class="card-body">
                   <div class="row text-center">
                     <div class="col-md-4"><h6>Entradas</h6><h3 class="text-success" id="fluxo-entradas">R$ 0,00</h3></div>
-                    <div class="col-md-4"><h6>SaÃ­das</h6><h3 class="text-danger" id="fluxo-saidas">R$ 0,00</h3></div>
+                    <div class="col-md-4"><h6>Saídas</h6><h3 class="text-danger" id="fluxo-saidas">R$ 0,00</h3></div>
                     <div class="col-md-4"><h6>Saldo</h6><h3 id="fluxo-saldo">R$ 0,00</h3></div>
                   </div>
                 </div>
@@ -1465,15 +1465,15 @@ hr {
           </div>
         </div>
 
-        <!-- RELATÃ“RIOS -->
+        <!-- RELATà“RIOS -->
         <div id="page-relatorios" class="page">
-          <h4 class="mb-4">RelatÃ³rios</h4>
+          <h4 class="mb-4">Relatórios</h4>
           <div class="row g-3">
             <div class="col-md-4">
               <div class="card">
                 <div class="card-body text-center">
                   <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
-                  <h6>RelatÃ³rio de Vendas</h6>
+                  <h6>Relatório de Vendas</h6>
                   <button class="btn btn-outline-primary btn-sm" onclick="gerarRelatorio('vendas')">Gerar</button>
                 </div>
               </div>
@@ -1535,14 +1535,14 @@ hr {
           </div>
           <div class="card mt-4">
             <div class="card-body" id="relatorio-resultado">
-              <p class="text-muted text-center">Selecione um relatÃ³rio acima para gerar.</p>
+              <p class="text-muted text-center">Selecione um relatório acima para gerar.</p>
             </div>
           </div>
         </div>
 
-        <!-- CONFIGURAÃ‡Ã•ES -->
+        <!-- CONFIGURAà‡à•ES -->
         <div id="page-configuracoes" class="page">
-          <h4 class="mb-4">ConfiguraÃ§Ãµes</h4>
+          <h4 class="mb-4">Configurações</h4>
           <div class="card">
             <div class="card-body">
               <form id="form-config">
@@ -1564,11 +1564,11 @@ hr {
                     <input type="email" class="form-control" id="config-email">
                   </div>
                   <div class="col-md-12">
-                    <label class="form-label">EndereÃ§o</label>
+                    <label class="form-label">Endereço</label>
                     <input type="text" class="form-control" id="config-endereco">
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label">Imposto PadrÃ£o (%)</label>
+                    <label class="form-label">Imposto Padrão (%)</label>
                     <input type="number" class="form-control" id="config-imposto" step="0.1">
                   </div>
                   <div class="col-md-6">
@@ -1576,15 +1576,15 @@ hr {
                     <input type="text" class="form-control" id="config-cupom">
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary mt-4"><i class="bi bi-check-lg"></i> Salvar ConfiguraÃ§Ãµes</button>
+                <button type="submit" class="btn btn-primary mt-4"><i class="bi bi-check-lg"></i> Salvar Configurações</button>
               </form>
             </div>
           </div>
         </div>
 
-        <!-- INVENTÃRIO/CONFERÃŠNCIA -->
+        <!-- INVENTàRIO/CONFERàŠNCIA -->
         <div id="page-auditoria" class="page">
-          <h4 class="mb-4">InventÃ¡rio / ConferÃªncia de Estoque</h4>
+          <h4 class="mb-4">Inventário / Conferência de Estoque</h4>
           
           <!-- Cards de Resumo -->
           <div class="row g-3 mb-4">
@@ -1638,22 +1638,22 @@ hr {
             </div>
           </div>
 
-          <!-- Tabela de InventÃ¡rio -->
+          <!-- Tabela de Inventário -->
           <div class="card">
             <div class="card-body">
               <div class="table-responsive">
                 <table class="table table-hover table-striped">
                   <thead class="table-dark">
                     <tr>
-                      <th>CÃ³digo</th>
+                      <th>Código</th>
                       <th>Produto</th>
                       <th>Categoria</th>
                       <th class="text-center">Qtd Atual</th>
-                      <th class="text-center">Estoque MÃ­n.</th>
+                      <th class="text-center">Estoque Mín.</th>
                       <th class="text-center">Status</th>
-                      <th class="text-end">PreÃ§o Custo</th>
+                      <th class="text-end">Preço Custo</th>
                       <th class="text-end">Valor Total</th>
-                      <th>Ãšlt. MovimentaÃ§Ã£o</th>
+                      <th>àšlt. Movimentação</th>
                     </tr>
                   </thead>
                   <tbody id="tabela-auditoria"></tbody>
@@ -1684,7 +1684,7 @@ hr {
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Nova Senha</label>
-                    <input type="password" class="form-control" id="conta-senha" placeholder="Deixe vazio para nÃ£o alterar">
+                    <input type="password" class="form-control" id="conta-senha" placeholder="Deixe vazio para não alterar">
                   </div>
                 </div>
                 <button type="submit" class="btn btn-primary mt-4"><i class="bi bi-check-lg"></i> Salvar</button>
@@ -1696,7 +1696,7 @@ hr {
     </main>
   </div>
 
-  <!-- MODAL GENÃ‰RICO -->
+  <!-- MODAL GENà‰RICO -->
   <div class="modal fade" id="modal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -1900,6 +1900,7 @@ function resetModalButton() {
   const btn = document.getElementById('modal-save');
   btn.disabled = false;
   btn.textContent = 'Salvar';
+  btn.style.display = '';
 }
 
 function searchProdutosLocal(busca) {
