@@ -1861,7 +1861,11 @@ function initEventListeners() {
         pdvUltimoResultado = null;
       } else if (busca.length >= 2) {
         const produtos = searchProdutosLocal(busca);
-        if (produtos.length === 1) {
+        // Prioritize exact code match
+        const exactMatch = produtos.find(p => (p.codigoBarras === busca || p.codigoInterno === busca));
+        if (exactMatch) {
+          adicionarAoCarrinho(exactMatch.id, exactMatch.nome, exactMatch.precoVenda, exactMatch.quantidade, exactMatch.unidade || 'UN');
+        } else if (produtos.length === 1) {
           const p = produtos[0];
           adicionarAoCarrinho(p.id, p.nome, p.precoVenda, p.quantidade, p.unidade || 'UN');
         } else if (produtos.length > 1) { searchProdutoPDV(); }
@@ -2086,12 +2090,16 @@ function searchProdutoPDV() {
   if (busca.length < 2) { document.getElementById('pdv-resultados').innerHTML = ''; pdvUltimoResultado = null; return; }
   const produtos = searchProdutosLocal(busca);
   if (produtos.length === 0) { document.getElementById('pdv-resultados').innerHTML = '<div style="padding:12px;color:#64748b;text-align:center">Nenhum produto encontrado</div>'; pdvUltimoResultado = null; return; }
-  pdvUltimoResultado = produtos.length === 1 ? produtos[0] : null;
+  
+  // Prioritize exact code match
+  const exactMatch = produtos.find(p => (p.codigoBarras === busca || p.codigoInterno === busca));
+  pdvUltimoResultado = exactMatch || (produtos.length === 1 ? produtos[0] : null);
+  
   document.getElementById('pdv-resultados').innerHTML = produtos.map(p => {
     const u = p.unidade || 'UN';
     const pesado = isProdutoPesado(u);
     const safeNome = (p.nome||'').replace(/'/g, "\\'");
-    return '<div class="pdv-result-item" onclick="adicionarAoCarrinho(' + p.id + ',\'' + safeNome + '\',' + p.precoVenda + ',' + p.quantidade + ',\'' + u + '\')"><div><div class="pdv-result-name">' + escapeHtml(p.nome) + '</div><div class="pdv-result-code">' + (p.codigoBarras||p.codigoInterno||'') + ' ' + (pesado?'<span class="badge bg-info">PESADO</span>':'') + '</div></div><div style="text-align:right"><div class="pdv-result-price">R$ ' + Number(p.precoVenda).toFixed(2).replace('.',',') + '/' + u + '</div><div class="pdv-result-stock">Est: ' + p.quantidade + ' ' + u + '</div></div></div>';
+    return '<div class="pdv-result-item" onclick="adicionarAoCarrinho(' + p.id + ',\'' + safeNome + '\',' + p.precoVenda + ',' + p.quantidade + ',\'' + u + '\')"><div><div class="pdv-result-name">' + escapeHtml(p.nome) + '</div><div class="pdv-result-code">' + (p.codigoBarras||p.codigoInterno||'') + ' ' + (pesado?'<span class="badge bg-info">PESADO</span>':'') + '</div></div><div style="text-align:right"><div class="pdv-result-price">R$ ' + Number(p.precoVenda).toFixed(2).replace('.',',') + '/' + u + '</div></div></div>';
   }).join('');
 }
 
@@ -2109,7 +2117,7 @@ function showPesoModal(produtoId, nome, preco, estoque, unidade) {
     '<div class="modal fade" id="peso-modal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">' +
     '<div class="modal-header"><h5 class="modal-title"><i class="bi bi-speedometer"></i> Informar Peso</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>' +
     '<div class="modal-body">' +
-    '<div class="text-center mb-3"><h4>' + escapeHtml(nome) + '</h4><p class="text-muted">Preco: R$ ' + Number(preco).toFixed(2).replace('.',',') + '/' + unidade + '</p><p class="text-muted">Estoque: ' + estoque + ' ' + unidade + '</p></div>' +
+    '<div class="text-center mb-3"><h4>' + escapeHtml(nome) + '</h4><p class="text-muted">Preco: R$ ' + Number(preco).toFixed(2).replace('.',',') + '/' + unidade + '</p></div>' +
     '<div class="input-group input-group-lg"><input type="number" class="form-control text-center" id="peso-input" step="0.001" min="0.001" max="' + estoque + '" placeholder="0,000" autofocus><span class="input-group-text">' + unidade + '</span></div>' +
     '<div class="text-center mt-2"><h3 id="peso-total">R$ 0,00</h3></div>' +
     '</div>' +
