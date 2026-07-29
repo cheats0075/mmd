@@ -1212,7 +1212,7 @@ hr {
                       <span>Desconto</span>
                       <div class="pdv-discount-input">
                         <span>R$</span>
-                        <input type="number" class="pdv-input-sm" id="pdv-desconto" value="0" min="0" step="0.01">
+                        <input type="number" class="pdv-input-sm" id="pdv-desconto" placeholder="0" min="0" step="0.01">
                       </div>
                     </div>
                     <div class="pdv-total-row pdv-total-final">
@@ -1254,7 +1254,7 @@ hr {
                     <label class="pdv-payment-label">VALOR RECEBIDO</label>
                     <div class="pdv-received-input">
                       <span>R$</span>
-                      <input type="number" class="pdv-input-lg" id="pdv-recebido" value="0" step="0.01">
+                      <input type="number" class="pdv-input-lg" id="pdv-recebido" placeholder="0,00" min="0" step="0.01">
                     </div>
                     <div class="pdv-troco">
                       Troco: <strong id="pdv-troco">R$ 0,00</strong>
@@ -2242,15 +2242,15 @@ function finalizarVenda() {
   document.querySelector('#modal .btn-close').addEventListener('click', function() { document.getElementById('modal-save').style.display = ''; });
   showToast('Venda realizada com sucesso!', 'success');
   carrinho = [];
-  document.getElementById('pdv-desconto').value = 0;
-  document.getElementById('pdv-recebido').value = 0;
+  document.getElementById('pdv-desconto').value = '';
+  document.getElementById('pdv-recebido').value = '';
   updateCarrinho();
 }
 
 function cancelarVenda() {
   carrinho = [];
-  document.getElementById('pdv-desconto').value = 0;
-  document.getElementById('pdv-recebido').value = 0;
+  document.getElementById('pdv-desconto').value = '';
+  document.getElementById('pdv-recebido').value = '';
   updateCarrinho();
   showToast('Venda cancelada', 'info');
 }
