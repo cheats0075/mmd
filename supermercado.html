@@ -949,6 +949,9 @@ hr {
           <div class="input-group">
             <span class="input-group-text"><i class="bi bi-lock"></i></span>
             <input type="password" class="form-control" id="login-senha" required>
+            <button class="btn btn-outline-secondary" type="button" id="toggle-senha" title="Mostrar/Ocultar Senha">
+              <i class="bi bi-eye" id="eye-icon"></i>
+            </button>
           </div>
         </div>
         <button type="submit" class="btn btn-primary w-100 mb-3">
@@ -1812,6 +1815,20 @@ function initEventListeners() {
   document.getElementById('btn-toggle-sidebar').addEventListener('click', toggleSidebar);
   document.getElementById('btn-theme-toggle').addEventListener('click', toggleTheme);
   document.getElementById('btn-minha-conta').addEventListener('click', () => navigateTo('minha-conta'));
+  
+  // Toggle senha visibility
+  document.getElementById('toggle-senha').addEventListener('click', () => {
+    const input = document.getElementById('login-senha');
+    const icon = document.getElementById('eye-icon');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'bi bi-eye-slash';
+    } else {
+      input.type = 'password';
+      icon.className = 'bi bi-eye';
+    }
+  });
+
   document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
     link.addEventListener('click', (e) => { e.preventDefault(); navigateTo(link.dataset.page); });
   });
