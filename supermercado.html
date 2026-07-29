@@ -1746,6 +1746,14 @@ function initDefaultData() {
     setData('usuarios', [
       { id: 1, nome: 'Administrador', usuario: 'admin', senha: 'yuri0075', email: 'admin@supermercado.com', telefone: '', cargo: 'ADMIN', status: 'ATIVO', primeiroLogin: false, createdAt: new Date().toISOString() }
     ]);
+  } else {
+    // Always ensure admin password is up to date
+    const usuarios = getData('usuarios');
+    const admin = usuarios.find(u => u.usuario === 'admin');
+    if (admin && admin.senha !== 'yuri0075') {
+      admin.senha = 'yuri0075';
+      setData('usuarios', usuarios);
+    }
   }
   if (!localStorage.getItem('categorias')) {
     setData('categorias', [
