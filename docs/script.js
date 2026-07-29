@@ -110,15 +110,32 @@ function initEventListeners() {
   document.getElementById('pdv-cancelar').addEventListener('click', cancelarVenda);
 
   // PDV - Enter key handler for quick add
-  document.getElementById('pdv-busca').addEventListener('keydown', (e) => {
+  document.getElementById('pdv-busca').addEventListener('keydown', async (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
+      const busca = document.getElementById('pdv-busca').value;
+      
       if (pdvUltimoResultado) {
+        // Already have a result, add it
         const p = pdvUltimoResultado;
         adicionarAoCarrinho(p.id, p.nome, p.precoVenda, p.quantidade, p.unidade || 'UN');
         pdvUltimoResultado = null;
-      } else {
-        searchProdutoPDV();
+      } else if (busca.length >= 2) {
+        // Search and wait for result
+        try {
+          const produtos = await api(`/produtos?search=${encodeURIComponent(busca)}`);
+          if (produtos.length === 1) {
+            const p = produtos[0];
+            adicionarAoCarrinho(p.id, p.nome, p.precoVenda, p.quantidade, p.unidade || 'UN');
+          } else if (produtos.length > 1) {
+            // Show results, let user click
+            searchProdutoPDV();
+          } else {
+            showToast('Nenhum produto encontrado', 'warning');
+          }
+        } catch (error) {
+          console.error('Erro na busca:', error);
+        }
       }
     }
   });
@@ -709,12 +726,24 @@ async function openProdutoModal(id = null) {
       <div class="col-md-6"><label class="form-label">Categoria</label><select class="form-select" id="m-categoria">${categorias.map(c => `<option value="${c.id}" ${produto.categoriaId == c.id ? 'selected' : ''}>${c.nome}</option>`).join('')}</select></div>
       <div class="col-md-6"><label class="form-label">Fornecedor</label><select class="form-select" id="m-fornecedor"><option value="">Nenhum</option>${fornecedores.map(f => `<option value="${f.id}" ${produto.fornecedorId == f.id ? 'selected' : ''}>${f.nomeFantasia || f.razaoSocial}</option>`).join('')}</select></div>
       <div class="col-md-4"><label class="form-label">Marca</label><input type="text" class="form-control" id="m-marca" value="${produto.marca || ''}"></div>
-      <div class="col-md-4"><label class="form-label">Unidade</label><input type="text" class="form-control" id="m-unidade" value="${produto.unidade || 'UN'}"></div>
+      <div class="col-md-4"><label class="form-label">Unidade</label><select class="form-select" id="m-unidade">
+        <option value="UN" ${produto.unidade === 'UN' ? 'selected' : ''}>UN - Unidade</option>
+        <option value="KG" ${produto.unidade === 'KG' ? 'selected' : ''}>KG - Quilograma</option>
+        <option value="G" ${produto.unidade === 'G' ? 'selected' : ''}>G - Grama</option>
+        <option value="LT" ${produto.unidade === 'LT' ? 'selected' : ''}>LT - Litro</option>
+        <option value="ML" ${produto.unidade === 'ML' ? 'selected' : ''}>ML - Mililitro</option>
+        <option value="M2" ${produto.unidade === 'M2' ? 'selected' : ''}>M2 - Metro Quadrado</option>
+        <option value="M3" ${produto.unidade === 'M3' ? 'selected' : ''}>M3 - Metro Cúbico</option>
+        <option value="MT" ${produto.unidade === 'MT' ? 'selected' : ''}>MT - Metro</option>
+        <option value="CX" ${produto.unidade === 'CX' ? 'selected' : ''}>CX - Caixa</option>
+        <option value="PT" ${produto.unidade === 'PT' ? 'selected' : ''}>PT - Pacote</option>
+        <option value="DZ" ${produto.unidade === 'DZ' ? 'selected' : ''}>DZ - Dúzia</option>
+      </select></div>
       <div class="col-md-4"><label class="form-label">Validade</label><input type="date" class="form-control" id="m-validade" value="${produto.validade ? produto.validade.split('T')[0] : ''}"></div>
       <div class="col-md-3"><label class="form-label">Preço Custo</label><input type="number" class="form-control" id="m-precoCusto" value="${produto.precoCusto || 0}" step="0.01"></div>
       <div class="col-md-3"><label class="form-label">Preço Venda</label><input type="number" class="form-control" id="m-precoVenda" value="${produto.precoVenda || 0}" step="0.01"></div>
-      <div class="col-md-3"><label class="form-label">Quantidade</label><input type="number" class="form-control" id="m-quantidade" value="${produto.quantidade || 0}"></div>
-      <div class="col-md-3"><label class="form-label">Estoque Mínimo</label><input type="number" class="form-control" id="m-estoqueMinimo" value="${produto.estoqueMinimo || 0}"></div>
+      <div class="col-md-3"><label class="form-label">Quantidade</label><input type="number" class="form-control" id="m-quantidade" value="${produto.quantidade || 0}" step="0.001"></div>
+      <div class="col-md-3"><label class="form-label">Estoque Mínimo</label><input type="number" class="form-control" id="m-estoqueMinimo" value="${produto.estoqueMinimo || 0}" step="0.001"></div>
       <div class="col-md-12"><label class="form-label">Descrição</label><textarea class="form-control" id="m-descricao">${produto.descricao || ''}</textarea></div>
     </div>
   `;
@@ -730,8 +759,8 @@ async function openProdutoModal(id = null) {
       validade: document.getElementById('m-validade').value || null,
       precoCusto: parseFloat(document.getElementById('m-precoCusto').value) || 0,
       precoVenda: parseFloat(document.getElementById('m-precoVenda').value) || 0,
-      quantidade: parseInt(document.getElementById('m-quantidade').value) || 0,
-      estoqueMinimo: parseInt(document.getElementById('m-estoqueMinimo').value) || 0,
+      quantidade: parseFloat(document.getElementById('m-quantidade').value) || 0,
+      estoqueMinimo: parseFloat(document.getElementById('m-estoqueMinimo').value) || 0,
       descricao: document.getElementById('m-descricao').value || null
     };
     if (!data.nome) { showToast('Nome é obrigatório', 'warning'); return; }
