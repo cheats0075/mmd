@@ -1523,6 +1523,15 @@ hr {
                 </div>
               </div>
             </div>
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-body text-center">
+                  <i class="bi bi-receipt fs-1 text-success"></i>
+                  <h6>Segunda Via do Cupom</h6>
+                  <button class="btn btn-outline-primary btn-sm" onclick="gerarRelatorio('segunda-via')">Gerar</button>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="card mt-4">
             <div class="card-body" id="relatorio-resultado">
@@ -2235,8 +2244,67 @@ function finalizarVenda() {
   setData('estoque', estoque);
 
   const troco = Math.max(0, recebido - total);
+  
+  // Gerar cupom no formato impressora fiscal
+  const config = getData('configuracoes');
+  const empresa = config.nome_empresa || 'SuperMercado';
+  const cnpj = config.cnpj || '';
+  const endereco = config.endereco || '';
+  const now = new Date();
+  
+  let cupomHtml = '<div id="cupom-container">' +
+    '<div style="font-family:monospace;font-size:12px;max-width:300px;margin:0 auto;background:#fff;color:#000;padding:15px;border:1px dashed #ccc;">' +
+    '<div style="text-align:center;border-bottom:2px dashed #000;padding-bottom:8px;margin-bottom:8px;">' +
+    '<strong style="font-size:14px;">' + escapeHtml(empresa) + '</strong><br>' +
+    (cnpj ? 'CNPJ: ' + escapeHtml(cnpj) + '<br>' : '') +
+    (endereco ? escapeHtml(endereco) + '<br>' : '') +
+    '<small>--------------------------------</small><br>' +
+    '<strong>CUPOM NAO FISCAL</strong><br>' +
+    '<small>--------------------------------</small>' +
+    '</div>' +
+    '<div style="margin-bottom:8px;">' +
+    '<strong>VENDA:</strong> #' + novaVenda.id + '<br>' +
+    '<strong>DATA:</strong> ' + now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR') + '<br>' +
+    '<strong>ATENDENTE:</strong> ' + escapeHtml(currentUser.nome) +
+    '</div>' +
+    '<div style="border-top:1px dashed #000;border-bottom:1px dashed #000;padding:5px 0;margin:5px 0;">' +
+    '<strong>ITEM  PRODUTO          QTD   TOTAL</strong><br>';
+  
+  carrinho.forEach(function(item) {
+    const nome = item.nome.length > 16 ? item.nome.substring(0, 16) + '..' : item.nome;
+    const totalItem = (item.precoUnit * item.quantidade) - item.desconto;
+    cupomHtml += '--------------------------------<br>' +
+      escapeHtml(nome).padEnd(17) + ' ' +
+      String(item.quantidade).padStart(5) + ' ' +
+      formatMoney(totalItem).padStart(10) + '<br>';
+  });
+  
+  cupomHtml += '--------------------------------</div>' +
+    '<div style="text-align:right;margin:5px 0;">' +
+    '<strong>SUBTOTAL: ' + formatMoney(subtotal) + '</strong><br>';
+  
+  if (desconto > 0) cupomHtml += 'DESCONTO:  -' + formatMoney(desconto) + '<br>';
+  
+  cupomHtml += '<div style="font-size:16px;border-top:1px dashed #000;margin-top:5px;padding-top:5px;">' +
+    '<strong>TOTAL: ' + formatMoney(total) + '</strong>' +
+    '</div></div>' +
+    '<div style="margin:8px 0;">' +
+    '<strong>PAGAMENTO:</strong> ' + pagamentoAtual + '<br>';
+  
+  if (recebido > 0) cupomHtml += '<strong>RECEBIDO:</strong> ' + formatMoney(recebido) + '<br>';
+  if (troco > 0) cupomHtml += '<strong>TROCO:</strong> ' + formatMoney(troco) + '<br>';
+  
+  cupomHtml += '</div>' +
+    '<div style="text-align:center;border-top:2px dashed #000;padding-top:8px;margin-top:8px;">' +
+    '<small>*** Obrigado pela preferencia! ***</small><br>' +
+    '<small>VOLTE SEMPRE!</small>' +
+    '</div></div></div>' +
+    '<div class="text-center mt-3">' +
+    '<button class="btn btn-outline-primary btn-sm" onclick="imprimirCupom()"><i class="bi bi-printer"></i> Imprimir</button>' +
+    '</div>';
+
   document.getElementById('modal-title').textContent = 'Venda Finalizada';
-  document.getElementById('modal-body').innerHTML = '<div style="font-family:monospace;text-align:center;max-width:400px;margin:0 auto;"><h5>Venda #' + novaVenda.id + ' Concluida!</h5><hr><p><strong>Data:</strong> ' + new Date().toLocaleString('pt-BR') + '</p><hr><table style="width:100%;font-size:14px;"><tr><th style="text-align:left;">Item</th><th>Qtd</th><th style="text-align:right;">Total</th></tr>' + carrinho.map(i => '<tr><td style="text-align:left;">' + escapeHtml(i.nome) + '</td><td>' + i.quantidade + 'x</td><td style="text-align:right;">' + formatMoney((i.precoUnit*i.quantidade)-i.desconto) + '</td></tr>').join('') + '</table><hr><p><strong>Pagamento:</strong> ' + pagamentoAtual + '</p><h4>TOTAL: ' + formatMoney(total) + '</h4>' + (troco>0?'<h5>Troco: ' + formatMoney(troco) + '</h5>':'') + '<hr><p style="font-size:12px;">Obrigado pela preferencia!</p></div>';
+  document.getElementById('modal-body').innerHTML = cupomHtml;
   document.getElementById('modal-save').style.display = 'none';
   new bootstrap.Modal(document.getElementById('modal')).show();
   document.querySelector('#modal .btn-close').addEventListener('click', function() { document.getElementById('modal-save').style.display = ''; });
@@ -2245,6 +2313,83 @@ function finalizarVenda() {
   document.getElementById('pdv-desconto').value = '';
   document.getElementById('pdv-recebido').value = '';
   updateCarrinho();
+}
+
+function imprimirCupom() {
+  const cupom = document.getElementById('cupom-container');
+  if (!cupom) return;
+  const win = window.open('', '_blank', 'width=320,height=600');
+  win.document.write('<html><head><title>Cupom</title><style>' +
+    'body{font-family:monospace;font-size:12px;margin:0;padding:10px;width:280px;}' +
+    'strong{font-size:13px;}</style></head><body>' +
+    cupom.innerHTML + '</body></html>');
+  win.document.close();
+  win.print();
+}
+
+function gerarCupomHtml(venda) {
+  const config = getData('configuracoes');
+  const empresa = config.nome_empresa || 'SuperMercado';
+  const cnpj = config.cnpj || '';
+  const endereco = config.endereco || '';
+  const data = new Date(venda.createdAt);
+  
+  let html = '<div id="cupom-2via">' +
+    '<div style="font-family:monospace;font-size:12px;max-width:300px;margin:0 auto;background:#fff;color:#000;padding:15px;border:1px dashed #ccc;">' +
+    '<div style="text-align:center;border-bottom:2px dashed #000;padding-bottom:8px;margin-bottom:8px;">' +
+    '<strong style="font-size:14px;">' + escapeHtml(empresa) + '</strong><br>' +
+    (cnpj ? 'CNPJ: ' + escapeHtml(cnpj) + '<br>' : '') +
+    (endereco ? escapeHtml(endereco) + '<br>' : '') +
+    '<small>--------------------------------</small><br>' +
+    '<strong>*** SEGUNDA VIA ***</strong><br>' +
+    '<small>--------------------------------</small>' +
+    '</div>' +
+    '<div style="margin-bottom:8px;">' +
+    '<strong>VENDA:</strong> #' + venda.id + '<br>' +
+    '<strong>DATA:</strong> ' + data.toLocaleDateString('pt-BR') + ' ' + data.toLocaleTimeString('pt-BR') + '<br>' +
+    '<strong>ATENDENTE:</strong> ' + escapeHtml(venda.usuario || 'N/A') +
+    '</div>' +
+    '<div style="border-top:1px dashed #000;border-bottom:1px dashed #000;padding:5px 0;margin:5px 0;">' +
+    '<strong>ITEM  PRODUTO          QTD   TOTAL</strong><br>';
+  
+  (venda.itens || []).forEach(function(item) {
+    const nome = (item.produtoNome || '').length > 16 ? (item.produtoNome || '').substring(0, 16) + '..' : (item.produtoNome || '');
+    html += '--------------------------------<br>' +
+      escapeHtml(nome).padEnd(17) + ' ' +
+      String(item.quantidade).padStart(5) + ' ' +
+      formatMoney(item.total || (item.precoUnit * item.quantidade)).padStart(10) + '<br>';
+  });
+  
+  html += '--------------------------------</div>' +
+    '<div style="text-align:right;margin:5px 0;">' +
+    '<strong>SUBTOTAL: ' + formatMoney(venda.subtotal) + '</strong><br>';
+  
+  if (venda.desconto > 0) html += 'DESCONTO:  -' + formatMoney(venda.desconto) + '<br>';
+  
+  html += '<div style="font-size:16px;border-top:1px dashed #000;margin-top:5px;padding-top:5px;">' +
+    '<strong>TOTAL: ' + formatMoney(venda.total) + '</strong>' +
+    '</div></div>' +
+    '<div style="margin:8px 0;">' +
+    '<strong>PAGAMENTO:</strong> ' + (venda.pagamento || venda.formaPagamento || 'N/A') +
+    '</div>' +
+    '<div style="text-align:center;border-top:2px dashed #000;padding-top:8px;margin-top:8px;">' +
+    '<small>*** Obrigado pela preferencia! ***</small><br>' +
+    '<small>VOLTE SEMPRE!</small>' +
+    '</div></div></div>';
+  return html;
+}
+
+function imprimirSegundaVia(vendaId) {
+  const vendas = getData('vendas');
+  const venda = vendas.find(v => v.id === vendaId);
+  if (!venda) { showToast('Venda nao encontrada', 'warning'); return; }
+  const html = gerarCupomHtml(venda);
+  const win = window.open('', '_blank', 'width=320,height=600');
+  win.document.write('<html><head><title>Segunda Via - Venda #' + vendaId + '</title><style>' +
+    'body{font-family:monospace;font-size:12px;margin:0;padding:10px;width:280px;}' +
+    'strong{font-size:13px;}</style></head><body>' + html + '</body></html>');
+  win.document.close();
+  win.print();
 }
 
 function cancelarVenda() {
@@ -2665,6 +2810,18 @@ function gerarRelatorio(tipo) {
     const pagar = (fin.contasPagar||[]).filter(c => c.status !== 'PAGA').reduce((a, c) => a + Number(c.valor), 0);
     const receber = (fin.contasReceber||[]).filter(c => c.status !== 'RECEBIDA').reduce((a, c) => a + Number(c.valor), 0);
     html = '<h6>Relatorio Financeiro</h6><p><strong>A Pagar:</strong> ' + formatMoney(pagar) + '</p><p><strong>A Receber:</strong> ' + formatMoney(receber) + '</p>';
+  } else if (tipo === 'segunda-via') {
+    const vendas = getData('vendas');
+    if (vendas.length === 0) {
+      html = '<p class="text-muted text-center">Nenhuma venda realizada.</p>';
+    } else {
+      html = '<h6>Segunda Via do Cupom</h6><p class="text-muted">Selecione uma venda para imprimir:</p>' +
+        '<div class="table-responsive"><table class="table table-sm table-hover"><thead><tr><th>#</th><th>Data</th><th>Total</th><th>Acao</th></tr></thead><tbody>' +
+        vendas.slice().reverse().map(function(v) {
+          return '<tr><td>' + v.id + '</td><td>' + new Date(v.createdAt).toLocaleString('pt-BR') + '</td><td>' + formatMoney(v.total) + '</td>' +
+            '<td><button class="btn btn-sm btn-outline-success" onclick="imprimirSegundaVia(' + v.id + ')"><i class="bi bi-printer"></i> Imprimir</button></td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
   } else { html = '<p class="text-muted">Relatorio em desenvolvimento.</p>'; }
   resultado.innerHTML = html;
 }
