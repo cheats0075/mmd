@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
-const { authMiddleware } = require('../middlewares/auth');
+const { authMiddleware, adminOnly } = require('../middlewares/auth');
 
 const prisma = new PrismaClient();
 router.use(authMiddleware);
@@ -46,9 +46,12 @@ router.get('/:id/compras', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', adminOnly, async (req, res) => {
   try {
-    const cliente = await prisma.cliente.create({ data: req.body });
+    const { nome, cpfCnpj, telefone, celular, email, dataNascimento, cep, endereco, numero, complemento, bairro, cidade, estado, observacoes } = req.body;
+    const cliente = await prisma.cliente.create({
+      data: { nome, cpfCnpj, telefone, celular, email, dataNascimento, cep, endereco, numero, complemento, bairro, cidade, estado, observacoes }
+    });
     res.status(201).json(cliente);
   } catch (error) {
     if (error.code === 'P2002') return res.status(400).json({ error: 'CPF/CNPJ já cadastrado' });
@@ -56,16 +59,20 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', adminOnly, async (req, res) => {
   try {
-    const cliente = await prisma.cliente.update({ where: { id: parseInt(req.params.id) }, data: req.body });
+    const { nome, cpfCnpj, telefone, celular, email, dataNascimento, cep, endereco, numero, complemento, bairro, cidade, estado, observacoes } = req.body;
+    const cliente = await prisma.cliente.update({
+      where: { id: parseInt(req.params.id) },
+      data: { nome, cpfCnpj, telefone, celular, email, dataNascimento, cep, endereco, numero, complemento, bairro, cidade, estado, observacoes }
+    });
     res.json(cliente);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao atualizar cliente' });
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', adminOnly, async (req, res) => {
   try {
     await prisma.cliente.delete({ where: { id: parseInt(req.params.id) } });
     res.json({ message: 'Cliente excluído com sucesso' });

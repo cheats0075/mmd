@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
-const { authMiddleware } = require('../middlewares/auth');
+const { authMiddleware, adminOnly } = require('../middlewares/auth');
 
 const prisma = new PrismaClient();
 router.use(authMiddleware);
@@ -15,18 +15,25 @@ router.get('/contas-pagar', async (req, res) => {
   }
 });
 
-router.post('/contas-pagar', async (req, res) => {
+router.post('/contas-pagar', adminOnly, async (req, res) => {
   try {
-    const conta = await prisma.contaPagar.create({ data: req.body });
+    const { descricao, valor, dataVencimento, dataPagamento, status, categoria, fornecedorId, observacao } = req.body;
+    const conta = await prisma.contaPagar.create({
+      data: { descricao, valor, dataVencimento, dataPagamento, status, categoria, fornecedorId, observacao }
+    });
     res.status(201).json(conta);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao criar conta' });
   }
 });
 
-router.put('/contas-pagar/:id', async (req, res) => {
+router.put('/contas-pagar/:id', adminOnly, async (req, res) => {
   try {
-    const conta = await prisma.contaPagar.update({ where: { id: parseInt(req.params.id) }, data: req.body });
+    const { descricao, valor, dataVencimento, dataPagamento, status, categoria, fornecedorId, observacao } = req.body;
+    const conta = await prisma.contaPagar.update({
+      where: { id: parseInt(req.params.id) },
+      data: { descricao, valor, dataVencimento, dataPagamento, status, categoria, fornecedorId, observacao }
+    });
     res.json(conta);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao atualizar conta' });
@@ -45,7 +52,7 @@ router.post('/contas-pagar/:id/pagar', async (req, res) => {
   }
 });
 
-router.delete('/contas-pagar/:id', async (req, res) => {
+router.delete('/contas-pagar/:id', adminOnly, async (req, res) => {
   try {
     await prisma.contaPagar.delete({ where: { id: parseInt(req.params.id) } });
     res.json({ message: 'Conta excluída com sucesso' });
@@ -63,18 +70,25 @@ router.get('/contas-receber', async (req, res) => {
   }
 });
 
-router.post('/contas-receber', async (req, res) => {
+router.post('/contas-receber', adminOnly, async (req, res) => {
   try {
-    const conta = await prisma.contaReceber.create({ data: req.body });
+    const { descricao, valor, dataVencimento, dataPagamento, status, categoria, clienteId, observacao } = req.body;
+    const conta = await prisma.contaReceber.create({
+      data: { descricao, valor, dataVencimento, dataPagamento, status, categoria, clienteId, observacao }
+    });
     res.status(201).json(conta);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao criar conta' });
   }
 });
 
-router.put('/contas-receber/:id', async (req, res) => {
+router.put('/contas-receber/:id', adminOnly, async (req, res) => {
   try {
-    const conta = await prisma.contaReceber.update({ where: { id: parseInt(req.params.id) }, data: req.body });
+    const { descricao, valor, dataVencimento, dataPagamento, status, categoria, clienteId, observacao } = req.body;
+    const conta = await prisma.contaReceber.update({
+      where: { id: parseInt(req.params.id) },
+      data: { descricao, valor, dataVencimento, dataPagamento, status, categoria, clienteId, observacao }
+    });
     res.json(conta);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao atualizar conta' });
@@ -93,7 +107,7 @@ router.post('/contas-receber/:id/receber', async (req, res) => {
   }
 });
 
-router.delete('/contas-receber/:id', async (req, res) => {
+router.delete('/contas-receber/:id', adminOnly, async (req, res) => {
   try {
     await prisma.contaReceber.delete({ where: { id: parseInt(req.params.id) } });
     res.json({ message: 'Conta excluída com sucesso' });

@@ -53,6 +53,20 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { clienteId, caixaId, itens, pagamentos, desconto } = req.body;
+    
+    // Validar estoque antes de criar a venda
+    for (const item of itens) {
+      const produto = await prisma.produto.findUnique({ where: { id: item.produtoId } });
+      if (!produto) {
+        return res.status(404).json({ error: `Produto ID ${item.produtoId} não encontrado` });
+      }
+      if (Number(produto.quantidade) < item.quantidade) {
+        return res.status(400).json({ 
+          error: `Estoque insuficiente para ${produto.nome}. Disponível: ${produto.quantidade}, Solicitado: ${item.quantidade}` 
+        });
+      }
+    }
+
     let subtotal = 0;
     for (const item of itens) {
       subtotal += item.precoUnit * item.quantidade;

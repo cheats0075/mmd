@@ -651,14 +651,80 @@
           </div>
         </div>
 
-        <!-- AUDITORIA -->
+        <!-- INVENTÁRIO/CONFERÊNCIA -->
         <div id="page-auditoria" class="page">
-          <h4 class="mb-4">Auditoria</h4>
+          <h4 class="mb-4">Inventário / Conferência de Estoque</h4>
+          
+          <!-- Cards de Resumo -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-2">
+              <div class="card text-center">
+                <div class="card-body">
+                  <h6 class="card-title text-muted">Total Produtos</h6>
+                  <h3 id="inv-total-produtos">0</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="card text-center">
+                <div class="card-body">
+                  <h6 class="card-title text-muted">Total Itens</h6>
+                  <h3 id="inv-total-itens">0</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="card text-center border-warning">
+                <div class="card-body">
+                  <h6 class="card-title text-warning">Estoque Baixo</h6>
+                  <h3 id="inv-estoque-baixo" class="text-warning">0</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="card text-center border-danger">
+                <div class="card-body">
+                  <h6 class="card-title text-danger">Sem Estoque</h6>
+                  <h3 id="inv-sem-estoque" class="text-danger">0</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="card text-center">
+                <div class="card-body">
+                  <h6 class="card-title text-muted">Valor (Custo)</h6>
+                  <h5 id="inv-valor-custo">R$ 0,00</h5>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="card text-center">
+                <div class="card-body">
+                  <h6 class="card-title text-muted">Valor (Venda)</h6>
+                  <h5 id="inv-valor-venda">R$ 0,00</h5>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela de Inventário -->
           <div class="card">
             <div class="card-body">
               <div class="table-responsive">
-                <table class="table table-hover">
-                  <thead><tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Tabela</th><th>IP</th></tr></thead>
+                <table class="table table-hover table-striped">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>Código</th>
+                      <th>Produto</th>
+                      <th>Categoria</th>
+                      <th class="text-center">Qtd Atual</th>
+                      <th class="text-center">Estoque Mín.</th>
+                      <th class="text-center">Status</th>
+                      <th class="text-end">Preço Custo</th>
+                      <th class="text-end">Valor Total</th>
+                      <th>Últ. Movimentação</th>
+                    </tr>
+                  </thead>
                   <tbody id="tabela-auditoria"></tbody>
                 </table>
               </div>

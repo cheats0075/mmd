@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
-const { authMiddleware } = require('../middlewares/auth');
+const { authMiddleware, adminOnly } = require('../middlewares/auth');
 
 const prisma = new PrismaClient();
 router.use(authMiddleware);
@@ -17,10 +17,12 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.put('/', async (req, res) => {
+router.put('/', adminOnly, async (req, res) => {
   try {
     const updates = req.body;
+    const allowedKeys = ['chave', 'valor', 'descricao'];
     for (const [chave, valor] of Object.entries(updates)) {
+      if (typeof chave !== 'string') continue;
       await prisma.configuracao.upsert({
         where: { chave },
         update: { valor },

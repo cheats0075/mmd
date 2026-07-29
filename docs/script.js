@@ -7,6 +7,19 @@ let currentUser = null;
 let carrinho = [];
 let chartVendas = null;
 
+// Utility: Escape HTML to prevent XSS
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Utility: Format money
+function formatMoney(value) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   if (token) {
     currentUser = JSON.parse(localStorage.getItem('usuario'));
@@ -1059,21 +1072,42 @@ async function saveConfig(e) {
   showToast('Configurações salvas com sucesso!', 'success');
 }
 
-// AUDITORIA
+// INVENTÁRIO/CONFERÊNCIA
 async function loadAuditoria() {
   try {
-    const auditorias = await api('/auditoria');
+    const data = await api('/estoque/inventario');
+    const { produtos, resumo } = data;
+    
+    // Atualizar resumo
+    document.getElementById('inv-total-produtos').textContent = resumo.totalProdutos;
+    document.getElementById('inv-total-itens').textContent = resumo.totalItens;
+    document.getElementById('inv-estoque-baixo').textContent = resumo.estoqueBaixo;
+    document.getElementById('inv-sem-estoque').textContent = resumo.semEstoque;
+    document.getElementById('inv-valor-custo').textContent = formatMoney(resumo.valorTotalCusto);
+    document.getElementById('inv-valor-venda').textContent = formatMoney(resumo.valorTotalVenda);
+    
     const tbody = document.getElementById('tabela-auditoria');
-    tbody.innerHTML = auditorias.map(a =>
-      `<tr>
-        <td>${new Date(a.createdAt).toLocaleString('pt-BR')}</td>
-        <td>${a.usuario?.nome || 'Sistema'}</td>
-        <td>${a.acao}</td>
-        <td>${a.tabela || '-'}</td>
-        <td>${a.ip || '-'}</td>
-      </tr>`
-    ).join('') || '<tr><td colspan="5" class="text-center text-muted">Nenhuma auditoria</td></tr>';
-  } catch (error) {}
+    tbody.innerHTML = produtos.map(p => {
+      const statusClass = p.statusEstoque === 'SEM_ESTOQUE' ? 'danger' : 
+                          p.statusEstoque === 'BAIXO' ? 'warning' : 'success';
+      const statusText = p.statusEstoque === 'SEM_ESTOQUE' ? 'Sem Estoque' : 
+                         p.statusEstoque === 'BAIXO' ? 'Estoque Baixo' : 'OK';
+      return `<tr>
+        <td><code>${escapeHtml(p.codigo)}</code></td>
+        <td>${escapeHtml(p.nome)}</td>
+        <td>${escapeHtml(p.categoria)}</td>
+        <td class="text-center">${p.quantidadeAtual} ${p.unidade}</td>
+        <td class="text-center">${p.estoqueMinimo} ${p.unidade}</td>
+        <td class="text-center"><span class="badge bg-${statusClass}">${statusText}</span></td>
+        <td class="text-end">${formatMoney(p.precoCusto)}</td>
+        <td class="text-end">${formatMoney(p.valorTotalCusto)}</td>
+        <td>${p.ultimaMovimentacao ? `<small>${p.ultimaMovimentacao.tipo}<br>${new Date(p.ultimaMovimentacao.data).toLocaleDateString('pt-BR')}</small>` : '-'}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="9" class="text-center text-muted">Nenhum produto encontrado</td></tr>';
+  } catch (error) {
+    console.error('Erro ao carregar inventário:', error);
+    showToast('Erro ao carregar inventário', 'error');
+  }
 }
 
 // MINHA CONTA

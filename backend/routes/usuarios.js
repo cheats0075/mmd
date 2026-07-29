@@ -48,10 +48,14 @@ router.post('/', adminOnly, async (req, res) => {
 
 router.put('/:id', adminOnly, async (req, res) => {
   try {
-    const { nome, email, telefone, cargo, status, permissoes } = req.body;
+    const { nome, email, telefone, cargo, status, permissoes, senha } = req.body;
+    const data = { nome, email, telefone, cargo, status, permissoes };
+    if (senha) {
+      data.senha = await bcrypt.hash(senha, 10);
+    }
     const usuario = await prisma.usuario.update({
       where: { id: parseInt(req.params.id) },
-      data: { nome, email, telefone, cargo, status, permissoes }
+      data
     });
     res.json(usuario);
   } catch (error) {

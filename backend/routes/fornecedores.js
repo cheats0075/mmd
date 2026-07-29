@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
-const { authMiddleware } = require('../middlewares/auth');
+const { authMiddleware, adminOnly } = require('../middlewares/auth');
 
 const prisma = new PrismaClient();
 router.use(authMiddleware);
@@ -33,9 +33,12 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', adminOnly, async (req, res) => {
   try {
-    const fornecedor = await prisma.fornecedor.create({ data: req.body });
+    const { razaoSocial, nomeFantasia, cnpj, ie, telefone, email, contato, endereco, cidade, estado } = req.body;
+    const fornecedor = await prisma.fornecedor.create({
+      data: { razaoSocial, nomeFantasia, cnpj, ie, telefone, email, contato, endereco, cidade, estado }
+    });
     res.status(201).json(fornecedor);
   } catch (error) {
     if (error.code === 'P2002') return res.status(400).json({ error: 'CNPJ já cadastrado' });
@@ -43,16 +46,20 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', adminOnly, async (req, res) => {
   try {
-    const fornecedor = await prisma.fornecedor.update({ where: { id: parseInt(req.params.id) }, data: req.body });
+    const { razaoSocial, nomeFantasia, cnpj, ie, telefone, email, contato, endereco, cidade, estado } = req.body;
+    const fornecedor = await prisma.fornecedor.update({
+      where: { id: parseInt(req.params.id) },
+      data: { razaoSocial, nomeFantasia, cnpj, ie, telefone, email, contato, endereco, cidade, estado }
+    });
     res.json(fornecedor);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao atualizar fornecedor' });
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', adminOnly, async (req, res) => {
   try {
     await prisma.fornecedor.delete({ where: { id: parseInt(req.params.id) } });
     res.json({ message: 'Fornecedor excluído com sucesso' });

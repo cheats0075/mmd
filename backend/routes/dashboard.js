@@ -52,10 +52,30 @@ router.get('/', async (req, res) => {
 
     const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
     const vendasMes = await prisma.venda.findMany({
-      where: { createdAt: { gte: inicioMes }, status: 'CONCLUIDA' }
+      where: { createdAt: { gte: inicioMes }, status: 'CONCLUIDA' },
+      include: { itens: { include: { produto: true } } }
     });
-    const lucroMensal = vendasMes.reduce((acc, v) => acc + Number(v.total) * 0.3, 0);
-    const lucroDiario = totalVendidoHoje * 0.3;
+    
+    // Calcular lucro real baseado no precoCusto
+    let lucroMensal = 0;
+    for (const venda of vendasMes) {
+      for (const item of venda.itens) {
+        const custoTotal = Number(item.produto.precoCusto) * Number(item.quantidade);
+        const receitaTotal = Number(item.total);
+        lucroMensal += receitaTotal - custoTotal;
+      }
+    }
+    
+    const lucroDiarioItens = vendasHoje.flatMap(v => v.itens);
+    let lucroDiario = 0;
+    for (const item of lucroDiarioItens) {
+      const produto = await prisma.produto.findUnique({ where: { id: item.produtoId } });
+      if (produto) {
+        const custoTotal = Number(produto.precoCusto) * Number(item.quantidade);
+        const receitaTotal = Number(item.total);
+        lucroDiario += receitaTotal - custoTotal;
+      }
+    }
 
     res.json({
       totalVendidoHoje,

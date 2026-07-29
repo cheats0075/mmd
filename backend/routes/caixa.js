@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
-const { authMiddleware } = require('../middlewares/auth');
+const { authMiddleware, adminOnly } = require('../middlewares/auth');
 
 const prisma = new PrismaClient();
 router.use(authMiddleware);
@@ -52,7 +52,10 @@ router.post('/abrir', async (req, res) => {
 
 router.post('/fechar', async (req, res) => {
   try {
-    const caixa = await prisma.caixa.findFirst({ where: { status: 'ABERTO' } });
+    const caixa = await prisma.caixa.findFirst({ 
+      where: { status: 'ABERTO' },
+      include: { vendas: true, sangrias: true }
+    });
     if (!caixa) return res.status(400).json({ error: 'Nenhum caixa aberto' });
     const totalVendas = caixa.vendas?.reduce((acc, v) => acc + Number(v.total), 0) || 0;
     const totalSangrias = caixa.sangrias?.filter(s => s.tipo === 'SANGRIA').reduce((acc, s) => acc + Number(s.valor), 0) || 0;
@@ -68,7 +71,7 @@ router.post('/fechar', async (req, res) => {
   }
 });
 
-router.post('/sangria', async (req, res) => {
+router.post('/sangria', adminOnly, async (req, res) => {
   try {
     const caixa = await prisma.caixa.findFirst({ where: { status: 'ABERTO' } });
     if (!caixa) return res.status(400).json({ error: 'Nenhum caixa aberto' });

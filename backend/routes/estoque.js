@@ -98,4 +98,70 @@ router.post('/ajuste', async (req, res) => {
   }
 });
 
+// Rota de Inventário/Conferência
+router.get('/inventario', async (req, res) => {
+  try {
+    const { categoriaId, status, busca } = req.query;
+    const where = {};
+    
+    if (categoriaId) where.categoriaId = parseInt(categoriaId);
+    if (status) where.status = status;
+    if (busca) {
+      where.OR = [
+        { nome: { contains: busca, mode: 'insensitive' } },
+        { codigoBarras: { contains: busca, mode: 'insensitive' } },
+        { codigoInterno: { contains: busca, mode: 'insensitive' } }
+      ];
+    }
+
+    const produtos = await prisma.produto.findMany({
+      where,
+      include: { 
+        categoria: { select: { nome: true } },
+        movimentacoes: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: { tipo: true, quantidade: true, createdAt: true }
+        }
+      },
+      orderBy: { nome: 'asc' }
+    });
+
+    const inventario = produtos.map(p => ({
+      id: p.id,
+      codigo: p.codigoBarras || p.codigoInterno || '-',
+      nome: p.nome,
+      categoria: p.categoria?.nome || '-',
+      unidade: p.unidade,
+      quantidadeAtual: Number(p.quantidade),
+      estoqueMinimo: Number(p.estoqueMinimo),
+      precoCusto: Number(p.precoCusto),
+      precoVenda: Number(p.precoVenda),
+      statusEstoque: Number(p.quantidade) === 0 ? 'SEM_ESTOQUE' : 
+                     Number(p.quantidade) <= Number(p.estoqueMinimo) ? 'BAIXO' : 'OK',
+      ultimaMovimentacao: p.movimentacoes[0] ? {
+        tipo: p.movimentacoes[0].tipo,
+        quantidade: Number(p.movimentacoes[0].quantidade),
+        data: p.movimentacoes[0].createdAt
+      } : null,
+      valorTotalCusto: Number(p.quantidade) * Number(p.precoCusto),
+      valorTotalVenda: Number(p.quantidade) * Number(p.precoVenda)
+    }));
+
+    // Resumo
+    const resumo = {
+      totalProdutos: inventario.length,
+      totalItens: inventario.reduce((sum, p) => sum + p.quantidadeAtual, 0),
+      estoqueBaixo: inventario.filter(p => p.statusEstoque === 'BAIXO').length,
+      semEstoque: inventario.filter(p => p.statusEstoque === 'SEM_ESTOQUE').length,
+      valorTotalCusto: inventario.reduce((sum, p) => sum + p.valorTotalCusto, 0),
+      valorTotalVenda: inventario.reduce((sum, p) => sum + p.valorTotalVenda, 0)
+    };
+
+    res.json({ produtos: inventario, resumo });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao gerar inventário' });
+  }
+});
+
 module.exports = router;
